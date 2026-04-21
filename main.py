@@ -1,20 +1,12 @@
-import json
+from pipeline import run_pipeline
 
-from ocr.extractor import extract_text
-from classification.classifier import classify_document
-
-
-def main():
-    with open("config/config.json", "r", encoding="utf-8") as f:
-        config = json.load(f)
-
-    text = extract_text("pdf files/n_r_10_n.pdf")
-
-    doc_type = classify_document(text, config)
-
-    print(doc_type)
-    print(text)
-
+FILES = [
+    "pdf files/a_r_9.pdf",
+    "pdf files/a_r_25.pdf",
+    "pdf files/n_r_5_n.pdf",
+    "pdf files/n_r_10_n.pdf",
+]
 
 if __name__ == "__main__":
-    main()
+    for path in FILES:
+        run_pipeline(path, n=3, formats=["pdf", "excel", "html"], output_dir="export")

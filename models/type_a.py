@@ -1,14 +1,12 @@
 from dataclasses import dataclass
 from typing import Optional
-from .type import Type
-from .line import LineA
+from models.type import Type
+from models.line_a import LineA
 
 
 @dataclass
 class TypeA(Type[LineA]):
     place: Optional[str] = None
-    hours_100: float = 0.0
-    hours_125: float = 0.0
-    hours_150: float = 0.0
-    bonus: float = 0.0
-    nesiot: float = 0.0
+    hours_100: int = 0
+    hours_125: int = 0
+    hours_150: int = 0
