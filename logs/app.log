@@ -1,0 +1,174 @@
+2026-04-22 01:42:35,383 [INFO] pipeline: Starting pipeline for: pdf files/a_r_9.pdf
+2026-04-22 01:42:41,657 [INFO] pipeline: [a_r_9] OCR extracted 338 words
+2026-04-22 01:42:41,657 [INFO] pipeline: [a_r_9] Classified as Type A
+2026-04-22 01:42:41,660 [INFO] pipeline: [a_r_9] Meta: month=10/2022 days=22 start=08:00 end=16:00 overtime=True
+2026-04-22 01:42:41,687 [INFO] pipeline:   -> export\a_r_9\v1.pdf
+2026-04-22 01:42:41,734 [INFO] pipeline:   -> export\a_r_9\v1.xlsx
+2026-04-22 01:42:41,739 [INFO] pipeline:   -> export\a_r_9\v1.html
+2026-04-22 01:42:41,764 [INFO] pipeline:   -> export\a_r_9\v2.pdf
+2026-04-22 01:42:41,813 [INFO] pipeline:   -> export\a_r_9\v2.xlsx
+2026-04-22 01:42:41,813 [INFO] pipeline:   -> export\a_r_9\v2.html
+2026-04-22 01:42:41,854 [INFO] pipeline:   -> export\a_r_9\v3.pdf
+2026-04-22 01:42:41,903 [INFO] pipeline:   -> export\a_r_9\v3.xlsx
+2026-04-22 01:42:41,904 [INFO] pipeline:   -> export\a_r_9\v3.html
+2026-04-22 01:42:41,904 [INFO] pipeline: [a_r_9] Done. Created 9 files.
+2026-04-22 01:42:41,904 [INFO] pipeline: Starting pipeline for: pdf files/a_r_25.pdf
+2026-04-22 01:42:46,637 [INFO] pipeline: [a_r_25] OCR extracted 236 words
+2026-04-22 01:42:46,637 [INFO] pipeline: [a_r_25] Classified as Type A
+2026-04-22 01:42:46,637 [INFO] pipeline: [a_r_25] Meta: month=2/2023 days=15 start=08:00 end=16:00 overtime=True
+2026-04-22 01:42:46,658 [INFO] pipeline:   -> export\a_r_25\v1.pdf
+2026-04-22 01:42:46,695 [INFO] pipeline:   -> export\a_r_25\v1.xlsx
+2026-04-22 01:42:46,695 [INFO] pipeline:   -> export\a_r_25\v1.html
+2026-04-22 01:42:46,703 [WARNING] pipeline:   [SKIP] export\a_r_25\v2.pdf - file is open
+2026-04-22 01:42:46,744 [INFO] pipeline:   -> export\a_r_25\v2.xlsx
+2026-04-22 01:42:46,750 [INFO] pipeline:   -> export\a_r_25\v2.html
+2026-04-22 01:42:46,769 [INFO] pipeline:   -> export\a_r_25\v3.pdf
+2026-04-22 01:42:46,785 [WARNING] pipeline:   [SKIP] export\a_r_25\v3.xlsx - file is open
+2026-04-22 01:42:46,787 [INFO] pipeline:   -> export\a_r_25\v3.html
+2026-04-22 01:42:46,787 [INFO] pipeline: [a_r_25] Done. Created 7 files.
+2026-04-22 01:42:46,787 [INFO] pipeline: Starting pipeline for: pdf files/n_r_5_n.pdf
+2026-04-22 01:42:53,375 [INFO] pipeline: [n_r_5_n] OCR extracted 356 words
+2026-04-22 01:42:53,375 [INFO] pipeline: [n_r_5_n] Classified as Type B
+2026-04-22 01:42:53,377 [INFO] pipeline: [n_r_5_n] Meta: month=9/2022 days=17 start=8:30 end=12:00 overtime=False
+2026-04-22 01:42:53,396 [INFO] pipeline:   -> export\n_r_5_n\v1.pdf
+2026-04-22 01:42:53,448 [INFO] pipeline:   -> export\n_r_5_n\v1.xlsx
+2026-04-22 01:42:53,448 [INFO] pipeline:   -> export\n_r_5_n\v1.html
+2026-04-22 01:42:53,477 [INFO] pipeline:   -> export\n_r_5_n\v2.pdf
+2026-04-22 01:42:53,482 [WARNING] pipeline:   [SKIP] export\n_r_5_n\v2.xlsx - file is open
+2026-04-22 01:42:53,482 [INFO] pipeline:   -> export\n_r_5_n\v2.html
+2026-04-22 01:42:53,510 [INFO] pipeline:   -> export\n_r_5_n\v3.pdf
+2026-04-22 01:42:53,554 [INFO] pipeline:   -> export\n_r_5_n\v3.xlsx
+2026-04-22 01:42:53,555 [INFO] pipeline:   -> export\n_r_5_n\v3.html
+2026-04-22 01:42:53,555 [INFO] pipeline: [n_r_5_n] Done. Created 8 files.
+2026-04-22 01:42:53,555 [INFO] pipeline: Starting pipeline for: pdf files/n_r_10_n.pdf
+2026-04-22 01:43:06,991 [INFO] pipeline: [n_r_10_n] OCR extracted 343 words
+2026-04-22 01:43:06,991 [INFO] pipeline: [n_r_10_n] Classified as Type B
+2026-04-22 01:43:07,004 [INFO] pipeline: [n_r_10_n] Meta: month=1/2023 days=11 start=8:01 end=11:03 overtime=False
+2026-04-22 01:43:07,052 [INFO] pipeline:   -> export\n_r_10_n\v1.pdf
+2026-04-22 01:43:07,069 [WARNING] pipeline:   [SKIP] export\n_r_10_n\v1.xlsx - file is open
+2026-04-22 01:43:07,069 [INFO] pipeline:   -> export\n_r_10_n\v1.html
+2026-04-22 01:43:07,109 [INFO] pipeline:   -> export\n_r_10_n\v2.pdf
+2026-04-22 01:43:07,182 [INFO] pipeline:   -> export\n_r_10_n\v2.xlsx
+2026-04-22 01:43:07,195 [INFO] pipeline:   -> export\n_r_10_n\v2.html
+2026-04-22 01:43:07,263 [INFO] pipeline:   -> export\n_r_10_n\v3.pdf
+2026-04-22 01:43:07,346 [INFO] pipeline:   -> export\n_r_10_n\v3.xlsx
+2026-04-22 01:43:07,346 [INFO] pipeline:   -> export\n_r_10_n\v3.html
+2026-04-22 01:43:07,346 [INFO] pipeline: [n_r_10_n] Done. Created 8 files.
+2026-04-22 01:48:19,846 [INFO] pipeline: Starting pipeline for: pdf files/a_r_9.pdf
+2026-04-22 01:48:26,366 [INFO] pipeline: [a_r_9] OCR extracted 338 words
+2026-04-22 01:48:26,366 [INFO] pipeline: [a_r_9] Classified as Type A
+2026-04-22 01:48:26,366 [INFO] pipeline: [a_r_9] Meta: month=10/2022 days=22 start=08:00 end=16:00 overtime=True
+2026-04-22 01:48:26,401 [INFO] pipeline:   -> export\a_r_9\v1.pdf
+2026-04-22 01:48:26,452 [INFO] pipeline:   -> export\a_r_9\v1.xlsx
+2026-04-22 01:48:26,452 [INFO] pipeline:   -> export\a_r_9\v1.html
+2026-04-22 01:48:26,481 [INFO] pipeline:   -> export\a_r_9\v2.pdf
+2026-04-22 01:48:26,529 [INFO] pipeline:   -> export\a_r_9\v2.xlsx
+2026-04-22 01:48:26,529 [INFO] pipeline:   -> export\a_r_9\v2.html
+2026-04-22 01:48:26,560 [INFO] pipeline:   -> export\a_r_9\v3.pdf
+2026-04-22 01:48:26,606 [INFO] pipeline:   -> export\a_r_9\v3.xlsx
+2026-04-22 01:48:26,606 [INFO] pipeline:   -> export\a_r_9\v3.html
+2026-04-22 01:48:26,608 [INFO] pipeline: [a_r_9] Done. Created 9 files.
+2026-04-22 01:48:26,608 [INFO] pipeline: Starting pipeline for: pdf files/a_r_25.pdf
+2026-04-22 01:48:31,462 [INFO] pipeline: [a_r_25] OCR extracted 236 words
+2026-04-22 01:48:31,462 [INFO] pipeline: [a_r_25] Classified as Type A
+2026-04-22 01:48:31,464 [INFO] pipeline: [a_r_25] Meta: month=2/2023 days=15 start=08:00 end=16:00 overtime=True
+2026-04-22 01:48:31,485 [INFO] pipeline:   -> export\a_r_25\v1.pdf
+2026-04-22 01:48:31,520 [INFO] pipeline:   -> export\a_r_25\v1.xlsx
+2026-04-22 01:48:31,520 [INFO] pipeline:   -> export\a_r_25\v1.html
+2026-04-22 01:48:31,540 [INFO] pipeline:   -> export\a_r_25\v2.pdf
+2026-04-22 01:48:31,583 [INFO] pipeline:   -> export\a_r_25\v2.xlsx
+2026-04-22 01:48:31,583 [INFO] pipeline:   -> export\a_r_25\v2.html
+2026-04-22 01:48:31,602 [INFO] pipeline:   -> export\a_r_25\v3.pdf
+2026-04-22 01:48:31,615 [WARNING] pipeline:   [SKIP] export\a_r_25\v3.xlsx - file is open
+2026-04-22 01:48:31,615 [INFO] pipeline:   -> export\a_r_25\v3.html
+2026-04-22 01:48:31,615 [INFO] pipeline: [a_r_25] Done. Created 8 files.
+2026-04-22 01:48:31,615 [INFO] pipeline: Starting pipeline for: pdf files/n_r_5_n.pdf
+2026-04-22 01:48:38,408 [INFO] pipeline: [n_r_5_n] OCR extracted 356 words
+2026-04-22 01:48:38,408 [INFO] pipeline: [n_r_5_n] Classified as Type B
+2026-04-22 01:48:38,416 [INFO] pipeline: [n_r_5_n] Meta: month=9/2022 days=17 start=8:30 end=12:00 overtime=False
+2026-04-22 01:48:38,432 [INFO] pipeline:   -> export\n_r_5_n\v1.pdf
+2026-04-22 01:48:38,495 [INFO] pipeline:   -> export\n_r_5_n\v1.xlsx
+2026-04-22 01:48:38,495 [INFO] pipeline:   -> export\n_r_5_n\v1.html
+2026-04-22 01:48:38,527 [INFO] pipeline:   -> export\n_r_5_n\v2.pdf
+2026-04-22 01:48:38,527 [WARNING] pipeline:   [SKIP] export\n_r_5_n\v2.xlsx - file is open
+2026-04-22 01:48:38,527 [INFO] pipeline:   -> export\n_r_5_n\v2.html
+2026-04-22 01:48:38,564 [INFO] pipeline:   -> export\n_r_5_n\v3.pdf
+2026-04-22 01:48:38,607 [INFO] pipeline:   -> export\n_r_5_n\v3.xlsx
+2026-04-22 01:48:38,608 [INFO] pipeline:   -> export\n_r_5_n\v3.html
+2026-04-22 01:48:38,608 [INFO] pipeline: [n_r_5_n] Done. Created 8 files.
+2026-04-22 01:48:38,608 [INFO] pipeline: Starting pipeline for: pdf files/n_r_10_n.pdf
+2026-04-22 01:48:45,975 [INFO] pipeline: [n_r_10_n] OCR extracted 343 words
+2026-04-22 01:48:45,975 [INFO] pipeline: [n_r_10_n] Classified as Type B
+2026-04-22 01:48:45,975 [INFO] pipeline: [n_r_10_n] Meta: month=1/2023 days=11 start=8:01 end=11:03 overtime=False
+2026-04-22 01:48:45,987 [INFO] pipeline:   -> export\n_r_10_n\v1.pdf
+2026-04-22 01:48:46,003 [WARNING] pipeline:   [SKIP] export\n_r_10_n\v1.xlsx - file is open
+2026-04-22 01:48:46,008 [INFO] pipeline:   -> export\n_r_10_n\v1.html
+2026-04-22 01:48:46,878 [INFO] pipeline:   -> export\n_r_10_n\v2.pdf
+2026-04-22 01:48:46,899 [INFO] pipeline:   -> export\n_r_10_n\v2.xlsx
+2026-04-22 01:48:46,908 [INFO] pipeline:   -> export\n_r_10_n\v2.html
+2026-04-22 01:48:46,928 [INFO] pipeline:   -> export\n_r_10_n\v3.pdf
+2026-04-22 01:48:46,942 [INFO] pipeline:   -> export\n_r_10_n\v3.xlsx
+2026-04-22 01:48:46,942 [INFO] pipeline:   -> export\n_r_10_n\v3.html
+2026-04-22 01:48:46,942 [INFO] pipeline: [n_r_10_n] Done. Created 8 files.
+2026-04-22 01:51:47,666 [INFO] pipeline: Starting pipeline for: pdf files/a_r_9.pdf
+2026-04-22 01:51:54,474 [INFO] pipeline: [a_r_9] OCR extracted 338 words
+2026-04-22 01:51:54,474 [INFO] pipeline: [a_r_9] Classified as Type A
+2026-04-22 01:51:54,477 [INFO] pipeline: [a_r_9] Meta: month=10/2022 days=22 start=08:00 end=16:00 overtime=True
+2026-04-22 01:51:54,510 [INFO] pipeline:   -> export\a_r_9\v1.pdf
+2026-04-22 01:51:54,581 [INFO] pipeline:   -> export\a_r_9\v1.xlsx
+2026-04-22 01:54:35,646 [INFO] pipeline: Starting pipeline for: pdf files/a_r_9.pdf
+2026-04-22 01:54:42,093 [INFO] pipeline: [a_r_9] OCR extracted 338 words
+2026-04-22 01:54:42,095 [INFO] pipeline: [a_r_9] Classified as Type A
+2026-04-22 01:54:42,096 [INFO] pipeline: [a_r_9] Meta: month=10/2022 days=22 start=08:00 end=16:00 overtime=True
+2026-04-22 01:54:42,128 [INFO] pipeline:   -> export\a_r_9\v1.pdf
+2026-04-22 01:54:42,186 [INFO] pipeline:   -> export\a_r_9\v1.xlsx
+2026-04-22 01:54:42,202 [INFO] pipeline:   -> export\a_r_9\v1.html
+2026-04-22 01:54:42,234 [INFO] pipeline:   -> export\a_r_9\v2.pdf
+2026-04-22 01:54:42,286 [INFO] pipeline:   -> export\a_r_9\v2.xlsx
+2026-04-22 01:54:42,286 [INFO] pipeline:   -> export\a_r_9\v2.html
+2026-04-22 01:54:42,319 [INFO] pipeline:   -> export\a_r_9\v3.pdf
+2026-04-22 01:54:42,370 [INFO] pipeline:   -> export\a_r_9\v3.xlsx
+2026-04-22 01:54:42,374 [INFO] pipeline:   -> export\a_r_9\v3.html
+2026-04-22 01:54:42,374 [INFO] pipeline: [a_r_9] Done. Created 9 files.
+2026-04-22 01:54:42,374 [INFO] pipeline: Starting pipeline for: pdf files/a_r_25.pdf
+2026-04-22 01:54:47,400 [INFO] pipeline: [a_r_25] OCR extracted 236 words
+2026-04-22 01:54:47,400 [INFO] pipeline: [a_r_25] Classified as Type A
+2026-04-22 01:54:47,408 [INFO] pipeline: [a_r_25] Meta: month=2/2023 days=15 start=08:00 end=16:00 overtime=True
+2026-04-22 01:54:47,470 [INFO] pipeline:   -> export\a_r_25\v1.pdf
+2026-04-22 01:54:47,560 [INFO] pipeline:   -> export\a_r_25\v1.xlsx
+2026-04-22 01:54:47,570 [INFO] pipeline:   -> export\a_r_25\v1.html
+2026-04-22 01:54:47,622 [INFO] pipeline:   -> export\a_r_25\v2.pdf
+2026-04-22 01:54:47,715 [INFO] pipeline:   -> export\a_r_25\v2.xlsx
+2026-04-22 01:54:47,719 [INFO] pipeline:   -> export\a_r_25\v2.html
+2026-04-22 01:54:47,776 [INFO] pipeline:   -> export\a_r_25\v3.pdf
+2026-04-22 01:54:47,813 [WARNING] pipeline:   [SKIP] export\a_r_25\v3.xlsx - file is open
+2026-04-22 01:54:47,816 [INFO] pipeline:   -> export\a_r_25\v3.html
+2026-04-22 01:54:47,816 [INFO] pipeline: [a_r_25] Done. Created 8 files.
+2026-04-22 01:54:47,821 [INFO] pipeline: Starting pipeline for: pdf files/n_r_5_n.pdf
+2026-04-22 01:54:59,261 [INFO] pipeline: [n_r_5_n] OCR extracted 356 words
+2026-04-22 01:54:59,262 [INFO] pipeline: [n_r_5_n] Classified as Type B
+2026-04-22 01:54:59,262 [INFO] pipeline: [n_r_5_n] Meta: month=9/2022 days=17 start=8:30 end=12:00 overtime=False
+2026-04-22 01:54:59,280 [INFO] pipeline:   -> export\n_r_5_n\v1.pdf
+2026-04-22 01:54:59,320 [INFO] pipeline:   -> export\n_r_5_n\v1.xlsx
+2026-04-22 01:54:59,322 [INFO] pipeline:   -> export\n_r_5_n\v1.html
+2026-04-22 01:54:59,347 [INFO] pipeline:   -> export\n_r_5_n\v2.pdf
+2026-04-22 01:54:59,359 [WARNING] pipeline:   [SKIP] export\n_r_5_n\v2.xlsx - file is open
+2026-04-22 01:54:59,363 [INFO] pipeline:   -> export\n_r_5_n\v2.html
+2026-04-22 01:54:59,387 [INFO] pipeline:   -> export\n_r_5_n\v3.pdf
+2026-04-22 01:54:59,434 [INFO] pipeline:   -> export\n_r_5_n\v3.xlsx
+2026-04-22 01:54:59,436 [INFO] pipeline:   -> export\n_r_5_n\v3.html
+2026-04-22 01:54:59,436 [INFO] pipeline: [n_r_5_n] Done. Created 8 files.
+2026-04-22 01:54:59,436 [INFO] pipeline: Starting pipeline for: pdf files/n_r_10_n.pdf
+2026-04-22 01:55:07,049 [INFO] pipeline: [n_r_10_n] OCR extracted 343 words
+2026-04-22 01:55:07,057 [INFO] pipeline: [n_r_10_n] Classified as Type B
+2026-04-22 01:55:07,058 [INFO] pipeline: [n_r_10_n] Meta: month=1/2023 days=11 start=8:01 end=11:03 overtime=False
+2026-04-22 01:55:07,087 [INFO] pipeline:   -> export\n_r_10_n\v1.pdf
+2026-04-22 01:55:07,093 [WARNING] pipeline:   [SKIP] export\n_r_10_n\v1.xlsx - file is open
+2026-04-22 01:55:07,093 [INFO] pipeline:   -> export\n_r_10_n\v1.html
+2026-04-22 01:55:07,114 [INFO] pipeline:   -> export\n_r_10_n\v2.pdf
+2026-04-22 01:55:07,129 [INFO] pipeline:   -> export\n_r_10_n\v2.xlsx
+2026-04-22 01:55:07,129 [INFO] pipeline:   -> export\n_r_10_n\v2.html
+2026-04-22 01:55:07,144 [INFO] pipeline:   -> export\n_r_10_n\v3.pdf
+2026-04-22 01:55:07,158 [INFO] pipeline:   -> export\n_r_10_n\v3.xlsx
+2026-04-22 01:55:07,166 [INFO] pipeline:   -> export\n_r_10_n\v3.html
+2026-04-22 01:55:07,166 [INFO] pipeline: [n_r_10_n] Done. Created 8 files.

@@ -50,6 +50,9 @@ def generate_type_a(meta: ReportMeta) -> TypeA:
     report.hours_100 = sum(l.hours_100 for l in report.lines)
     report.hours_125 = sum(l.hours_125 for l in report.lines)
     report.hours_150 = sum(l.hours_150 for l in report.lines)
+    report.shabat_total = 0
+    report.bonus = 0.0
+    report.nesiot = round(rng.choice([0, 0, 0, 150, 200, 250]), 2)
 
     return report
 

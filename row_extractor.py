@@ -12,5 +12,5 @@ def get_cell_value(line, key: str) -> str:
     if val is None:
         return ""
     if key in MINUTE_FIELDS:
-        return minutes_to_str(val) if val else ""
+        return minutes_to_str(val)  # 0 → "0:00"
     return str(val)

@@ -10,3 +10,6 @@ class TypeA(Type[LineA]):
     hours_100: int = 0
     hours_125: int = 0
     hours_150: int = 0
+    shabat_total: int = 0   # סה"כ שעות שבת בחודש
+    bonus: float = 0.0
+    nesiot: float = 0.0
