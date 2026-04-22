@@ -1,4 +1,0 @@
-Traceback (most recent call last):
-  File "c:\Users\user1\Downloads\PDF\main.py", line 1, in <module>
-    from app.core.pipeline import run_pipeline
-SyntaxError: source code string cannot contain null bytes
