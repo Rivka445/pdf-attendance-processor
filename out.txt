@@ -1,8 +1,0 @@
-Traceback (most recent call last):
-  File "c:\Users\user1\Downloads\PDF\main.py", line 1, in <module>
-    from pipeline import run_pipeline
-  File "c:\Users\user1\Downloads\PDF\pipeline.py", line 11, in <module>
-    from parsing.parser_type_b import ParserB
-  File "c:\Users\user1\Downloads\PDF\parsing\parser_type_b.py", line 11, in <module>
-    from parsing.base_parser import BaseParser
-ModuleNotFoundError: No module named 'parsing.base_parser'

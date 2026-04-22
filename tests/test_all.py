@@ -1,18 +1,18 @@
 import pytest
-from unittest.mock import MagicMock, patch
-from models.report_meta import ReportMeta
-from models.type_a import TypeA
-from models.type_b import TypeB
-from models.line_a import LineA
-from models.line_b import LineB
-from rules.base_rules import calc_total, minutes_to_str, to_minutes, BREAK_HOURS_A, BREAK_HOURS_B
-from rules.rules_type_a import generate_type_a
-from rules.rules_type_b import generate_type_b
-from classification.classifier import classify_document
-from parsing.parser_type_a import ParserA
-from row_extractor import get_cell_value
-from exceptions import OcrError, ClassificationError, UnsupportedFormatError
-from container import Container
+from unittest.mock import MagicMock
+from app.models.report_meta import ReportMeta
+from app.models.type_a import TypeA
+from app.models.type_b import TypeB
+from app.models.line_a import LineA
+from app.models.line_b import LineB
+from app.processing.rules.base_rules import calc_total, minutes_to_str, to_minutes, BREAK_HOURS_A, BREAK_HOURS_B
+from app.processing.rules.rules_type_a import generate_type_a
+from app.processing.rules.rules_type_b import generate_type_b
+from app.processing.classification.classifier import classify_document
+from app.processing.parsing.parser_type_a import ParserA
+from app.row_extractor import get_cell_value
+from app.core.exceptions import OcrError, ClassificationError, UnsupportedFormatError
+from app.core.container import Container
 
 
 # ── Fixtures ────────────────────────────────────────────────────────────────
@@ -25,17 +25,45 @@ def meta_a():
 def meta_b():
     return ReportMeta("B", 9, 2022, 10, "8:30", "12:00", False, "test_b")
 
+@pytest.fixture
+def source_a():
+    report = TypeA()
+    import calendar
+    for day_num in range(2, 12):
+        weekday = calendar.weekday(2022, 10, day_num)
+        if weekday >= 5:
+            continue
+        report.lines.append(LineA(
+            date=f"{day_num:02d}/10/2022",
+            day=["שני","שלישי","רביעי","חמישי","שישי","שבת","ראשון"][weekday],
+            start_time="08:00", end_time="16:00",
+            break_time=30, total=450,
+            hours_100=450, hours_125=0, hours_150=0, shabat=0,
+        ))
+    return report
+
+@pytest.fixture
+def source_b():
+    report = TypeB()
+    report.month = "09/2022"
+    for day_num in range(1, 11):
+        report.lines.append(LineB(
+            date=f"{day_num}/9/22",
+            day="ראשון",
+            start_time="8:30", end_time="12:00",
+            total=210,
+        ))
+    return report
+
 
 # ── base_rules ───────────────────────────────────────────────────────────────
 
 class TestBaseRules:
 
     def test_calc_total_type_a(self):
-        # 08:00 → 16:00 = 480 דק - 30 הפסקה = 450
         assert calc_total("08:00", "16:00", BREAK_HOURS_A) == 450
 
     def test_calc_total_type_b(self):
-        # 8:30 → 12:00 = 210 דק, ללא הפסקה
         assert calc_total("8:30", "12:00", BREAK_HOURS_B) == 210
 
     def test_calc_total_single_digit_hour(self):
@@ -60,50 +88,49 @@ class TestBaseRules:
 
 class TestRulesTypeA:
 
-    def test_generates_correct_day_count(self, meta_a):
-        report = generate_type_a(meta_a)
-        assert report.days == meta_a.work_days
+    def test_generates_correct_day_count(self, meta_a, source_a):
+        report = generate_type_a(meta_a, source_a)
+        assert report.days == len(source_a.lines)
 
-    def test_no_saturday_in_days(self, meta_a):
-        report = generate_type_a(meta_a)
+    def test_no_saturday_in_days(self, meta_a, source_a):
+        report = generate_type_a(meta_a, source_a)
         assert all(l.day != "שבת" for l in report.lines)
 
-    def test_no_friday_in_days(self, meta_a):
-        report = generate_type_a(meta_a)
-        assert all(l.day != "שישי" for l in report.lines)
+    def test_preserves_source_dates(self, meta_a, source_a):
+        report = generate_type_a(meta_a, source_a)
+        assert [l.date for l in source_a.lines] == [l.date for l in report.lines]
 
-    def test_end_always_after_start(self, meta_a):
-        report = generate_type_a(meta_a)
+    def test_end_always_after_start(self, meta_a, source_a):
+        report = generate_type_a(meta_a, source_a)
         for l in report.lines:
             assert to_minutes(l.end_time) > to_minutes(l.start_time)
 
-    def test_total_equals_end_minus_start_minus_break(self, meta_a):
-        report = generate_type_a(meta_a)
+    def test_total_equals_end_minus_start_minus_break(self, meta_a, source_a):
+        report = generate_type_a(meta_a, source_a)
         for l in report.lines:
-            expected = calc_total(l.start_time, l.end_time, BREAK_HOURS_A)
-            assert l.total == expected
+            assert l.total == calc_total(l.start_time, l.end_time, BREAK_HOURS_A)
 
-    def test_hours_100_plus_125_equals_total(self, meta_a):
-        report = generate_type_a(meta_a)
+    def test_hours_100_plus_125_equals_total(self, meta_a, source_a):
+        report = generate_type_a(meta_a, source_a)
         for l in report.lines:
             assert l.hours_100 + l.hours_125 + l.hours_150 == l.total
 
-    def test_deterministic_same_seed(self, meta_a):
-        r1 = generate_type_a(meta_a)
-        r2 = generate_type_a(meta_a)
-        assert [(l.date, l.start_time, l.end_time) for l in r1.lines] == \
-               [(l.date, l.start_time, l.end_time) for l in r2.lines]
+    def test_deterministic_same_seed(self, meta_a, source_a):
+        r1 = generate_type_a(meta_a, source_a)
+        r2 = generate_type_a(meta_a, source_a)
+        assert [(l.start_time, l.end_time) for l in r1.lines] == \
+               [(l.start_time, l.end_time) for l in r2.lines]
 
-    def test_different_seeds_differ(self):
+    def test_different_seeds_differ(self, source_a):
         m1 = ReportMeta("A", 10, 2022, 10, "08:00", "16:00", False, "seed1")
         m2 = ReportMeta("A", 10, 2022, 10, "08:00", "16:00", False, "seed2")
-        r1 = generate_type_a(m1)
-        r2 = generate_type_a(m2)
+        r1 = generate_type_a(m1, source_a)
+        r2 = generate_type_a(m2, source_a)
         assert [(l.start_time, l.end_time) for l in r1.lines] != \
                [(l.start_time, l.end_time) for l in r2.lines]
 
-    def test_summary_totals_correct(self, meta_a):
-        report = generate_type_a(meta_a)
+    def test_summary_totals_correct(self, meta_a, source_a):
+        report = generate_type_a(meta_a, source_a)
         assert report.total_hours == sum(l.total for l in report.lines)
         assert report.hours_100   == sum(l.hours_100 for l in report.lines)
         assert report.hours_125   == sum(l.hours_125 for l in report.lines)
@@ -113,37 +140,37 @@ class TestRulesTypeA:
 
 class TestRulesTypeB:
 
-    def test_generates_correct_work_day_count(self, meta_b):
-        report = generate_type_b(meta_b)
-        assert report.days == meta_b.work_days
+    def test_generates_correct_work_day_count(self, meta_b, source_b):
+        report = generate_type_b(meta_b, source_b)
+        assert report.days == len(source_b.lines)
 
-    def test_shabat_rows_are_empty(self, meta_b):
-        report = generate_type_b(meta_b)
+    def test_shabat_rows_are_empty(self, meta_b, source_b):
+        report = generate_type_b(meta_b, source_b)
         for l in report.lines:
             if l.is_shabat:
                 assert l.start_time is None
                 assert l.end_time is None
                 assert l.total is None
 
-    def test_no_break_deducted(self, meta_b):
-        report = generate_type_b(meta_b)
+    def test_no_break_deducted(self, meta_b, source_b):
+        report = generate_type_b(meta_b, source_b)
         for l in report.lines:
             if not l.is_shabat and l.start_time and l.end_time:
-                expected = calc_total(l.start_time, l.end_time, BREAK_HOURS_B)
-                assert l.total == expected
+                assert l.total == calc_total(l.start_time, l.end_time, BREAK_HOURS_B)
 
-    def test_total_payment_calculated(self, meta_b):
-        report = generate_type_b(meta_b)
+    def test_total_payment_calculated(self, meta_b, source_b):
+        report = generate_type_b(meta_b, source_b)
         expected = round(report.total_hours / 60 * report.price_per_hour, 2)
         assert report.total_payment == expected
 
     def test_shabat_follows_friday(self, meta_b):
-        import calendar
-        report = generate_type_b(meta_b)
-        for i, l in enumerate(report.lines):
-            if l.is_shabat and i > 0:
-                prev = report.lines[i - 1]
-                assert prev.day == "שישי"
+        source = TypeB()
+        source.month = "09/2022"
+        source.lines = [LineB(date="2/9/22", day="שישי", start_time="8:30", end_time="12:00", total=210)]
+        report = generate_type_b(meta_b, source)
+        shabat = [l for l in report.lines if l.is_shabat]
+        assert len(shabat) >= 1
+        assert all(l.day == "שבת" for l in shabat)
 
 
 # ── Classifier ───────────────────────────────────────────────────────────────
@@ -155,16 +182,15 @@ class TestClassifier:
 
     def test_classify_type_a_by_percent_columns(self):
         words = [
-            self._make_word("100%", 500, 100),   # y=100, img_h~2000 → y_pct=0.05
+            self._make_word("100%", 500, 100),
             self._make_word("125%", 600, 100),
             self._make_word("08:00", 300, 500),
         ]
         assert classify_document(words) == "A"
 
     def test_classify_type_b_by_time_position(self):
-        # אין 100%/125%, שעות מתחילות נמוך (y_pct > 0.25)
         words = [
-            self._make_word("08:30", 500, 700),  # y=700, img_h~2000 → 0.35
+            self._make_word("08:30", 500, 700),
             self._make_word("12:00", 600, 700),
             self._make_word("1/9/22", 800, 700),
         ]
@@ -223,11 +249,26 @@ class TestRowExtractor:
 
 class TestContainer:
 
+    def test_default_handlers_registered(self):
+        c = Container()
+        assert c.get_handler("A") is not None
+        assert c.get_handler("B") is not None
+        assert c.get_handler("C") is None
+
+    def test_register_new_type(self):
+        c = Container()
+        mock_parser = MagicMock(spec=["parse", "extract_meta"])
+        mock_rules  = MagicMock(spec=["apply"])
+        c.register_type("C", parser=mock_parser, rules=mock_rules)
+        assert c.get_handler("C") is not None
+        assert c.get_handler("C").parser is mock_parser
+        assert c.get_handler("C").rules  is mock_rules
+
     def test_default_renderers_available(self):
         c = Container()
-        assert c.get_renderer("pdf") is not None
+        assert c.get_renderer("pdf")   is not None
         assert c.get_renderer("excel") is not None
-        assert c.get_renderer("html") is not None
+        assert c.get_renderer("html")  is not None
 
     def test_register_custom_renderer(self):
         c = Container()
@@ -239,26 +280,41 @@ class TestContainer:
         c = Container()
         assert c.get_renderer("unknown") is None
 
+    def test_handler_prepare_input_a(self):
+        c = Container()
+        handler = c.get_handler("A")
+        words = [{"text": "test", "x": 0, "y": 0}]
+        c.build_lines = MagicMock(return_value=["line1"])
+        result = handler.prepare_input(words, c)
+        assert result == "line1"
+
+    def test_handler_prepare_input_b(self):
+        c = Container()
+        handler = c.get_handler("B")
+        words = [{"text": "test", "x": 0, "y": 0}]
+        result = handler.prepare_input(words, c)
+        assert result is words
+
 
 # ── Pipeline ─────────────────────────────────────────────────────────────────
 
 class TestPipeline:
 
     def test_unsupported_format_raises(self):
-        from pipeline import run_pipeline
+        from app.core.pipeline import run_pipeline
         c = Container()
         with pytest.raises(UnsupportedFormatError):
             run_pipeline("any.pdf", formats=["csv"], container=c)
 
     def test_ocr_failure_raises_ocr_error(self):
-        from pipeline import run_pipeline
+        from app.core.pipeline import run_pipeline
         c = Container()
         c.extract_words = MagicMock(side_effect=RuntimeError("OCR crash"))
         with pytest.raises(OcrError):
             run_pipeline("any.pdf", formats=["html"], container=c)
 
     def test_classification_unknown_raises(self):
-        from pipeline import run_pipeline
+        from app.core.pipeline import run_pipeline
         c = Container()
         c.extract_words = MagicMock(return_value=[{"text": "x", "x": 0, "y": 0}])
         c.classify = MagicMock(return_value="UNKNOWN")
@@ -266,14 +322,41 @@ class TestPipeline:
             run_pipeline("any.pdf", formats=["html"], container=c)
 
     def test_full_pipeline_type_a(self, tmp_path):
-        from pipeline import run_pipeline
+        from app.core.pipeline import run_pipeline
         c = Container()
         meta = ReportMeta("A", 10, 2022, 5, "08:00", "16:00", False, "test")
+        mock_source = MagicMock()
+        mock_source.lines = []
         c.extract_words = MagicMock(return_value=[{"text": "100%", "x": 500, "y": 100}])
-        c.build_lines   = MagicMock(return_value=["08:00 16:00 01/10/2022"])
         c.classify      = MagicMock(return_value="A")
-        c.parser_a.extract_meta = MagicMock(return_value=meta)
+        handler = c.get_handler("A")
+        handler.parser.parse        = MagicMock(return_value=mock_source)
+        handler.parser.extract_meta = MagicMock(return_value=meta)
+        handler.rules.apply         = MagicMock(return_value=mock_source)
+        c.get_renderer("html").render = MagicMock(return_value=str(tmp_path / "v1.html"))
         created = run_pipeline("test.pdf", n=1, formats=["html"],
                                output_dir=str(tmp_path), container=c)
         assert len(created) == 1
-        assert created[0].endswith(".html")
+        handler.rules.apply.assert_called_once()
+
+    def test_pipeline_uses_handler_not_if_elif(self, tmp_path):
+        from app.core.pipeline import run_pipeline
+        c = Container()
+        meta = ReportMeta("C", 1, 2023, 5, "09:00", "17:00", False, "test_c")
+        mock_source = MagicMock()
+        mock_source.lines = []
+        mock_report = MagicMock()
+        mock_report.lines = []
+        c.extract_words = MagicMock(return_value=[{"text": "x", "x": 0, "y": 0}])
+        c.classify      = MagicMock(return_value="C")
+        mock_parser = MagicMock()
+        mock_parser.parse.return_value        = mock_source
+        mock_parser.extract_meta.return_value = meta
+        mock_rules  = MagicMock()
+        mock_rules.apply.return_value = mock_report
+        c.register_type("C", parser=mock_parser, rules=mock_rules)
+        c.get_renderer("html").render = MagicMock(return_value=str(tmp_path / "v1.html"))
+        created = run_pipeline("test.pdf", n=1, formats=["html"],
+                               output_dir=str(tmp_path), container=c)
+        assert len(created) == 1
+        mock_rules.apply.assert_called_once()

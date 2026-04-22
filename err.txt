@@ -1,22 +1,4 @@
-2026-04-22 01:51:47,666 [INFO] pipeline: Starting pipeline for: pdf files/a_r_9.pdf
-2026-04-22 01:51:54,474 [INFO] pipeline: [a_r_9] OCR extracted 338 words
-2026-04-22 01:51:54,474 [INFO] pipeline: [a_r_9] Classified as Type A
-2026-04-22 01:51:54,477 [INFO] pipeline: [a_r_9] Meta: month=10/2022 days=22 start=08:00 end=16:00 overtime=True
-2026-04-22 01:51:54,510 [INFO] pipeline:   -> export\a_r_9\v1.pdf
-2026-04-22 01:51:54,581 [INFO] pipeline:   -> export\a_r_9\v1.xlsx
 Traceback (most recent call last):
-  File "c:\Users\user1\Downloads\PDF\pipeline.py", line 105, in run_pipeline
-    container.get_renderer(fmt).render(report, out_path)
-  File "c:\Users\user1\Downloads\PDF\rendering\html_renderer.py", line 57, in render
-    html = f"<!DOCTYPE html><html><head><meta charset='utf-8'>{_CSS}</head><body><h2>{title}</h2>{content}</body></html>"
-                                                                                      ^^^^^
-NameError: name 'title' is not defined. Did you mean: 'table'?
-
-The above exception was the direct cause of the following exception:
-
-Traceback (most recent call last):
-  File "c:\Users\user1\Downloads\PDF\main.py", line 12, in <module>
-    run_pipeline(path, n=3, formats=["pdf", "excel", "html"], output_dir="export")
-  File "c:\Users\user1\Downloads\PDF\pipeline.py", line 111, in run_pipeline
-    raise RenderingError(f"Rendering failed: {out_path}") from e
-exceptions.RenderingError: Rendering failed: export\a_r_9\v1.html
+  File "c:\Users\user1\Downloads\PDF\main.py", line 1, in <module>
+    from app.core.pipeline import run_pipeline
+SyntaxError: source code string cannot contain null bytes

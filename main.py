@@ -1,4 +1,4 @@
-from pipeline import run_pipeline
+from app.core.pipeline import run_pipeline
 
 FILES = [
     "pdf files/a_r_9.pdf",
