@@ -44,8 +44,11 @@ def run(input_pdf: Path, output_dir: Path | None = None, container: AppContainer
 
     logger.info("Rendering ...")
     for renderer in container.renderers:
-        out = renderer.render(report, output_dir)
-        logger.info("  -> %s", out)
+        try:
+            out = renderer.render(report, output_dir)
+            logger.info("  -> %s", out)
+        except Exception as exc:
+            logger.warning("  Renderer %s failed: %s", type(renderer).__name__, exc)
 
     logger.info("Done.")
 

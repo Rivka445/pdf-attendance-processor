@@ -43,7 +43,7 @@ class AppConfig:
     confidence_threshold: float         = 0.25
 
     # Output
-    output_formats:       tuple[str, ...] = field(default=("html", "pdf"))
+    output_formats:       tuple[str, ...] = field(default_factory=lambda: ("html", "excel", "pdf"))
 
 
 # ---------------------------------------------------------------------------
@@ -144,10 +144,14 @@ class AppContainer:
     def renderers(self) -> list:
         if self._renderers is None:
             from attendance_processor.generation.html_renderer import HtmlRenderer
+            from attendance_processor.generation.excel_renderer import ExcelRenderer
+            from attendance_processor.generation.pdf_renderer import PdfRenderer
 
             _format_map = {
-                "html":  HtmlRenderer
-                }
+                "html":  HtmlRenderer,
+                "excel": ExcelRenderer,
+                "pdf":   PdfRenderer,
+            }
             self._renderers = [
                 _format_map[fmt]()
                 for fmt in self._config.output_formats
