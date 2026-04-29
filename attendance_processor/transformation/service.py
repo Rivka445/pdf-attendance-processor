@@ -55,11 +55,23 @@ class TransformationService:
         Inject a custom registry for testing or to support extra types.
     """
 
-    def __init__(self, registry: TypeRegistry | None = None) -> None:
-        self._registry = registry or TypeRegistry.default()
+    def __init__(
+        self,
+        registry: TypeRegistry | None = None,
+        strategies: dict | None = None,
+        rules_registry: dict | None = None,
+    ) -> None:
+        if strategies is not None or rules_registry is not None:
+            # Dict-based injection (used in tests)
+            self._strategies     = strategies or {}
+            self._rules_registry = rules_registry or {}
+            self._registry       = None
+        else:
+            self._registry       = registry or TypeRegistry.default()
+            self._strategies     = None
+            self._rules_registry = None
         logger.debug(
-            "TransformationService initialised: registered_types=%s",
-            self._registry.known_types(),
+            "TransformationService initialised",
         )
 
     # ── Public API ───────────────────────────────────────────────────────────
@@ -108,9 +120,21 @@ class TransformationService:
     # ── Private helpers ──────────────────────────────────────────────────────
 
     def _get_rules(self, report_type: str) -> ReportTransformationRules:
+        if self._rules_registry is not None:
+            rules = self._rules_registry.get(report_type)
+            if rules is None:
+                from domain.errors import UnknownReportTypeError
+                raise UnknownReportTypeError(report_type, list(self._rules_registry))
+            return rules
         return self._registry.get_rules(report_type)
 
     def _get_strategy(self, report_type: str) -> TransformationStrategy:
+        if self._strategies is not None:
+            strategy = self._strategies.get(report_type)
+            if strategy is None:
+                from domain.errors import UnknownReportTypeError
+                raise UnknownReportTypeError(report_type, list(self._strategies))
+            return strategy
         return self._registry.get_strategy(report_type)
 
 

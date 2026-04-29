@@ -122,10 +122,14 @@ def html_cell_value(row: AttendanceRow, key: str) -> str:
     if key == "exit":
         return row.clock.exit.strftime("%H:%M")
     if key == "break":
+        if row.break_rec is None:
+            return "—"
         return f"{row.break_rec.duration_min} דק'" if row.break_rec.duration_min else "—"
     if key == "net":
         return _fmt_hours(row.net_hours)
     if key in _OT_PILL:
+        if row.overtime is None:
+            return "—"
         attr_map = {"ot_100": "regular_ot", "ot_125": "band_125", "ot_150": "band_150"}
         val = getattr(row.overtime, attr_map[key])
         bg, fg = _OT_PILL[key]
@@ -135,6 +139,8 @@ def html_cell_value(row: AttendanceRow, key: str) -> str:
             f'background:{bg};color:{fg}">{_fmt_hours(val or 0.0)}</span>'
         )
     if key == "shabbat":
+        if row.overtime is None:
+            return "—"
         val = row.overtime.weekend_ot
         return _fmt_hours(val or 0.0)
     if key == "location":
@@ -183,7 +189,7 @@ def _build_css(t: dict[str, str]) -> str:
         f"tbody tr:nth-child(even){{background:{t['even_row']}}}"
         f"tbody tr:hover{{background:{t['hover']}}}"
         "tbody td{padding:7px 10px;border-bottom:1px solid #e2e8f0;white-space:nowrap}"
-        f".total-row{{background:{t['total_row']}!important;font-weight:700}}"
+        f".total-row{{background:{t.get('total_row', '#e0e8f0')}!important;font-weight:700}}"
         ".footer{margin-top:14px;font-size:10px;color:#8a9ab0;text-align:center}"
         "</style>"
     )

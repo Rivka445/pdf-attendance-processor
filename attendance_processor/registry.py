@@ -91,10 +91,10 @@ class TypeRegistry:
     @classmethod
     def default(cls) -> "TypeRegistry":
         """Build the registry with the built-in TYPE_A and TYPE_B entries."""
-        from attendance_processor.config.rules import TYPE_A_RULES, TYPE_B_RULES
-        from attendance_processor.parsers.type_a_parser import TypeAParser
-        from attendance_processor.parsers.type_b_parser import TypeBParser
-        from attendance_processor.transformation.strategy import (
+        from config.rules import TYPE_A_RULES, TYPE_B_RULES
+        from parsers.type_a_parser import TypeAParser
+        from parsers.type_b_parser import TypeBParser
+        from transformation.strategy import (
             TypeATransformationStrategy,
             TypeBTransformationStrategy,
         )
@@ -119,7 +119,7 @@ class TypeRegistry:
     def _get(self, report_type: str) -> _TypeEntry:
         entry = self._entries.get(report_type)
         if entry is None:
-            from attendance_processor.domain.errors import UnknownReportTypeError
+            from domain.errors import UnknownReportTypeError
             raise UnknownReportTypeError(
                 report_type=report_type,
                 registry_keys=self.known_types(),
