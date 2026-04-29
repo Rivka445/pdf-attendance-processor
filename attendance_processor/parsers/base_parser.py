@@ -32,7 +32,7 @@ from datetime import date, time
 from typing import Optional
 
 from domain.models import AttendanceReport, AttendanceRow, ReportSummary, TimeRange
-from errors import InvalidClockError, NoRowsError, ParseError
+from domain.errors import InvalidClockError, NoRowsError, ParseError
 
 logger = logging.getLogger(__name__)
 
