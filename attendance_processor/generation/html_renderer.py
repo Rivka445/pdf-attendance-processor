@@ -122,12 +122,12 @@ def html_cell_value(row: AttendanceRow, key: str) -> str:
     if key == "exit":
         return row.clock.exit.strftime("%H:%M")
     if key == "break":
-        return f"{row.break_rec.duration_min} דק'" if row.break_rec else "—"
+        return f"{row.break_rec.duration_min} דק'" if row.break_rec.duration_min else "—"
     if key == "net":
         return _fmt_hours(row.net_hours)
     if key in _OT_PILL:
         attr_map = {"ot_100": "regular_ot", "ot_125": "band_125", "ot_150": "band_150"}
-        val = getattr(row.overtime, attr_map[key]) if row.overtime else 0.0
+        val = getattr(row.overtime, attr_map[key])
         bg, fg = _OT_PILL[key]
         return (
             f'<span style="display:inline-block;padding:1px 6px;'
@@ -135,7 +135,7 @@ def html_cell_value(row: AttendanceRow, key: str) -> str:
             f'background:{bg};color:{fg}">{_fmt_hours(val or 0.0)}</span>'
         )
     if key == "shabbat":
-        val = row.overtime.weekend_ot if row.overtime else 0.0
+        val = row.overtime.weekend_ot
         return _fmt_hours(val or 0.0)
     if key == "location":
         return row.location or "—"
@@ -246,13 +246,13 @@ def _totals_row(report: AttendanceReport, columns: list[tuple[str, str]]) -> str
             if key == "net":
                 total += row.net_hours or 0.0
             elif key == "ot_100":
-                total += (row.overtime.regular_ot if row.overtime else 0.0)
+                total += row.overtime.regular_ot
             elif key == "ot_125":
-                total += (row.overtime.band_125   if row.overtime else 0.0)
+                total += row.overtime.band_125
             elif key == "ot_150":
-                total += (row.overtime.band_150   if row.overtime else 0.0)
+                total += row.overtime.band_150
             elif key == "shabbat":
-                total += (row.overtime.weekend_ot if row.overtime else 0.0)
+                total += row.overtime.weekend_ot
         cells.append(f"<td>{_fmt_hours(total)}</td>")
     return f'<tr class="total-row">{"".join(cells)}</tr>'
 

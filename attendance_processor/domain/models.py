@@ -253,6 +253,45 @@ class ReportSummary(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Null Objects  — replace None checks throughout the codebase
+# ---------------------------------------------------------------------------
+
+class NullBreakRecord(BreakRecord):
+    """
+    Sentinel that behaves like a BreakRecord with zero duration.
+    Use instead of None so callers never need ``if row.break_rec``.
+    """
+    model_config = {"frozen": True}
+
+    def __init__(self) -> None:
+        super().__init__(
+            break_type=BreakType.OTHER,
+            clock=TimeRange(
+                entry=__import__("datetime").time(0, 0),
+                exit=__import__("datetime").time(0, 1),
+            ),
+            duration_min=0,
+        )
+
+
+class NullOvertimeBuckets(OvertimeBuckets):
+    """
+    Sentinel that behaves like OvertimeBuckets with all zeros.
+    Use instead of None so callers never need ``if row.overtime``.
+    """
+    model_config = {"frozen": True}
+
+    def __init__(self) -> None:
+        super().__init__(
+            regular_ot=0.0,
+            band_125=0.0,
+            band_150=0.0,
+            weekend_ot=0.0,
+            total_ot=0.0,
+        )
+
+
+# ---------------------------------------------------------------------------
 # AttendanceReport  — root document object
 # ---------------------------------------------------------------------------
 
