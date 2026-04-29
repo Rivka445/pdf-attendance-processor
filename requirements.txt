@@ -1,0 +1,39 @@
+# requirements.txt
+# Pinned for Python 3.12 / Windows
+# Generated: 2026-04-29
+
+# ── OCR / PDF ingestion ──────────────────────────────────────────────────────
+PyMuPDF==1.27.2.3          # fitz — PDF → images
+pytesseract==0.3.13        # Tesseract wrapper
+Pillow==12.2.0             # image I/O for pytesseract
+pdf2image==1.17.0          # optional poppler-based fallback (transitive dep)
+
+# ── Data modelling ───────────────────────────────────────────────────────────
+pydantic==2.13.3
+pydantic_core==2.46.3
+annotated-types==0.7.0
+
+# ── Excel generation ─────────────────────────────────────────────────────────
+openpyxl==3.1.5
+et_xmlfile==2.0.0
+
+# ── HTML → PDF rendering ─────────────────────────────────────────────────────
+weasyprint==68.1
+pydyf==0.12.1
+tinycss2==1.5.1
+tinyhtml5==2.1.0
+cssselect2==0.9.0
+fonttools==4.62.1
+pyphen==0.17.2
+webencodings==0.5.1
+brotli==1.2.0
+zopfli==0.4.1
+
+# ── C-extension support ──────────────────────────────────────────────────────
+cffi==2.0.0
+pycparser==3.0
+
+# ── Typing / packaging ───────────────────────────────────────────────────────
+typing_extensions==4.15.0
+typing-inspection==0.4.2
+packaging==26.2
