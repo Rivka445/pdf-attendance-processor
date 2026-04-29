@@ -27,7 +27,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 from domain.models import AttendanceReport
-from errors import MissingRendererError, OutputDirectoryError, RenderingError
+from domain.errors import MissingRendererError, OutputDirectoryError, RenderingError
 
 __all__ = [
     "BaseRenderer",

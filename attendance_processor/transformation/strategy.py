@@ -287,7 +287,7 @@ class TypeBTransformationStrategy(TransformationStrategy):
             row.row_date,
             row.clock.entry, new_entry,
             row.clock.exit,  new_exit,
-            (row.break_rec.duration_min if row.break_rec else 0), new_break_min,
+            old_break_min, new_break_min,
             net_hours,
         )
 

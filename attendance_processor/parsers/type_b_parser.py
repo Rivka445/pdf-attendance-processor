@@ -17,7 +17,7 @@ from datetime import date
 from typing import Optional
 
 from domain.models import AttendanceRow, ReportSummary
-from errors import InvalidClockError, NoRowsError
+from domain.errors import InvalidClockError, NoRowsError
 from parsers.base_parser import BaseParser
 
 logger = logging.getLogger(__name__)

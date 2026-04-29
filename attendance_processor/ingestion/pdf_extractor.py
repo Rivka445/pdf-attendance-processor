@@ -32,7 +32,7 @@ import fitz          # PyMuPDF
 import pytesseract
 from PIL import Image
 
-from errors import ExtractionError, OCRError, PDFOpenError
+from domain.errors import ExtractionError, OCRError, PDFOpenError
 
 logger = logging.getLogger(__name__)
 

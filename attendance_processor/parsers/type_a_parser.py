@@ -22,7 +22,7 @@ from domain.models import (
     ReportSummary,
     TimeRange,
 )
-from errors import InvalidClockError, NoRowsError
+from domain.errors import InvalidClockError, NoRowsError
 from parsers.base_parser import BaseParser
 
 logger = logging.getLogger(__name__)
