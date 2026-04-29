@@ -3,46 +3,27 @@ parsers/parser_factory.py
 ==========================
 Factory that maps a ``report_type`` string to the correct concrete parser.
 
-Dependency injection
---------------------
-The default registry wires ``"TYPE_A"`` → :class:`TypeAParser` and
-``"TYPE_B"`` → :class:`TypeBParser`.  Pass a custom ``registry`` dict to
-``ParserFactory.__init__`` to override or extend that mapping without
-touching this file — useful for testing or adding new document types::
-
-    factory = ParserFactory(registry={"TYPE_X": MyXParser()})
-    parser  = factory.get_parser("TYPE_X")
-    report  = parser.parse(text)
+Accepts either a :class:`TypeRegistry` or a plain ``dict`` as the registry.
 
 Usage::
 
-    from parsers.parser_factory import ParserFactory
-    from classification.classifier import Classifier
-
-    classifier = Classifier()
-    result     = classifier.classify(normalized_text)
-
     factory = ParserFactory()
-    parser  = factory.get_parser(result.report_type)
-    report  = parser.parse(normalized_text, source_file="report.pdf")
+    parser  = factory.get_parser("TYPE_A")
+
+    # Custom dict registry:
+    factory = ParserFactory(registry={"CUSTOM": my_parser})
+
+    # Register at runtime:
+    factory.register("TYPE_C", TypeCParser())
 """
 
 from __future__ import annotations
 
 import logging
 
-from errors import UnknownReportTypeError
 from parsers.base_parser import BaseParser
-from parsers.type_a_parser import TypeAParser
-from parsers.type_b_parser import TypeBParser
 
 logger = logging.getLogger(__name__)
-
-# Default singleton instances — constructed once, reused for every file in a batch.
-_DEFAULT_REGISTRY: dict[str, BaseParser] = {
-    "TYPE_A": TypeAParser(),
-    "TYPE_B": TypeBParser(),
-}
 
 
 class ParserFactory:
@@ -52,21 +33,27 @@ class ParserFactory:
     Parameters
     ----------
     registry:
-        ``{report_type: parser_instance}`` mapping.  Defaults to the
-        module-level ``_DEFAULT_REGISTRY``.  Inject a custom dict to
-        replace or extend the available parsers.
+        A :class:`TypeRegistry` instance **or** a plain ``dict`` mapping
+        report_type strings to parser instances.
+        Defaults to ``TypeRegistry.default()``.
     """
 
-    def __init__(
-        self,
-        registry: dict[str, BaseParser] | None = None,
-    ) -> None:
-        self._registry: dict[str, BaseParser] = (
-            registry if registry is not None else _DEFAULT_REGISTRY
-        )
+    def __init__(self, registry=None) -> None:
+        if registry is None:
+            from attendance_processor.registry import TypeRegistry
+            self._type_registry = TypeRegistry.default()
+            self._dict_registry: dict | None = None
+        elif isinstance(registry, dict):
+            self._type_registry = None
+            self._dict_registry = dict(registry)
+        else:
+            # TypeRegistry instance
+            self._type_registry = registry
+            self._dict_registry = None
+
         logger.debug(
             "ParserFactory initialised: registered_types=%s",
-            list(self._registry),
+            self._known_types(),
         )
 
     def get_parser(self, report_type: str) -> BaseParser:
@@ -76,25 +63,37 @@ class ParserFactory:
         Raises:
             UnknownReportTypeError: If *report_type* is not in the registry.
         """
-        parser = self._registry.get(report_type)
-        if parser is None:
-            logger.error(
-                "ParserFactory.get_parser: no parser for type=%s  known=%s",
-                report_type, list(self._registry),
-            )
-            raise UnknownReportTypeError(
-                report_type=report_type,
-                registry_keys=list(self._registry),
-            )
-        logger.debug("ParserFactory.get_parser: selected %s for type=%s", type(parser).__name__, report_type)
+        if self._dict_registry is not None:
+            parser = self._dict_registry.get(report_type)
+            if parser is None:
+                from domain.errors import UnknownReportTypeError
+                raise UnknownReportTypeError(
+                    report_type=report_type,
+                    registry_keys=list(self._dict_registry),
+                )
+            return parser
+        parser = self._type_registry.get_parser(report_type)
+        logger.debug(
+            "ParserFactory.get_parser: selected %s for type=%s",
+            type(parser).__name__, report_type,
+        )
         return parser
 
     def register(self, report_type: str, parser: BaseParser) -> None:
-        """
-        Register a custom parser at runtime.
+        """Add or replace a parser for *report_type*."""
+        if self._dict_registry is not None:
+            self._dict_registry[report_type] = parser
+        else:
+            # Wrap the TypeRegistry in a dict so we can mutate it
+            known = self._known_types()
+            d: dict = {}
+            for t in known:
+                d[t] = self._type_registry.get_parser(t)
+            d[report_type] = parser
+            self._dict_registry = d
+            self._type_registry = None
 
-        Allows extending the system with new document types without
-        subclassing or modifying this file.
-        """
-        logger.info("ParserFactory.register: type=%s  parser=%s", report_type, type(parser).__name__)
-        self._registry[report_type] = parser
+    def _known_types(self) -> list[str]:
+        if self._dict_registry is not None:
+            return list(self._dict_registry)
+        return self._type_registry.known_types()

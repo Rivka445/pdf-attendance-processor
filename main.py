@@ -50,7 +50,7 @@ def run(input_pdf: Path, output_dir: Path | None = None) -> None:
     report = TransformationService().transform(report)
 
     logger.info("Rendering ...")
-    for renderer in (HtmlRenderer(), ExcelRenderer()):
+    for renderer in (HtmlRenderer(), ExcelRenderer(), PdfRenderer()):
         out = renderer.render(report, output_dir)
         logger.info("  -> %s", out)
 

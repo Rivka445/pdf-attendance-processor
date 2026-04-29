@@ -1,0 +1,10 @@
+# requirements-docker.txt — unpinned versions for Linux/Docker
+PyMuPDF
+pytesseract
+Pillow
+pdf2image
+pydantic>=2
+openpyxl
+weasyprint
+fonttools
+pyphen

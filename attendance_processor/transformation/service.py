@@ -30,27 +30,17 @@ extended for new report types without modifying this file::
 from __future__ import annotations
 
 import logging
-from typing import Optional
 
-from config.rules import RULES_REGISTRY, ReportTransformationRules
+from attendance_processor.registry import TypeRegistry
+from config.rules import ReportTransformationRules
 from domain.models import (
     AttendanceReport,
     AttendanceRow,
     ReportSummary,
 )
-from errors import UnknownReportTypeError
-from transformation.strategy import (
-    TransformationStrategy,
-    TypeATransformationStrategy,
-    TypeBTransformationStrategy,
-)
+from transformation.strategy import TransformationStrategy
 
 logger = logging.getLogger(__name__)
-
-_DEFAULT_STRATEGIES: dict[str, TransformationStrategy] = {
-    "TYPE_A": TypeATransformationStrategy(),
-    "TYPE_B": TypeBTransformationStrategy(),
-}
 
 
 class TransformationService:
@@ -60,31 +50,28 @@ class TransformationService:
 
     Parameters
     ----------
-    strategies:
-        ``{report_type: strategy}`` mapping.  Defaults to
-        ``TYPE_A → TypeATransformationStrategy`` and
-        ``TYPE_B → TypeBTransformationStrategy``.
-        Inject a custom dict to override or add new strategies.
-    rules_registry:
-        ``{report_type: ReportTransformationRules}`` mapping.
-        Defaults to ``config.rules.RULES_REGISTRY``.
-        Inject a custom dict for testing or to support extra types.
+    registry:
+        A :class:`TypeRegistry` instance.  Defaults to ``TypeRegistry.default()``.
+        Inject a custom registry for testing or to support extra types.
     """
 
     def __init__(
         self,
-        strategies:      Optional[dict[str, TransformationStrategy]] = None,
-        rules_registry:  Optional[dict[str, ReportTransformationRules]] = None,
+        registry: TypeRegistry | None = None,
+        strategies: dict | None = None,
+        rules_registry: dict | None = None,
     ) -> None:
-        self._strategies:     dict[str, TransformationStrategy]      = (
-            strategies     if strategies     is not None else _DEFAULT_STRATEGIES
-        )
-        self._rules_registry: dict[str, ReportTransformationRules] = (
-            rules_registry if rules_registry is not None else RULES_REGISTRY
-        )
+        if strategies is not None or rules_registry is not None:
+            # Dict-based injection (used in tests)
+            self._strategies     = strategies or {}
+            self._rules_registry = rules_registry or {}
+            self._registry       = None
+        else:
+            self._registry       = registry or TypeRegistry.default()
+            self._strategies     = None
+            self._rules_registry = None
         logger.debug(
-            "TransformationService initialised: strategies=%s  rules=%s",
-            list(self._strategies), list(self._rules_registry),
+            "TransformationService initialised",
         )
 
     # ── Public API ───────────────────────────────────────────────────────────
@@ -133,30 +120,22 @@ class TransformationService:
     # ── Private helpers ──────────────────────────────────────────────────────
 
     def _get_rules(self, report_type: str) -> ReportTransformationRules:
-        rules = self._rules_registry.get(report_type)
-        if rules is None:
-            logger.error(
-                "TransformationService: no rules for type=%s  known=%s",
-                report_type, list(self._rules_registry),
-            )
-            raise UnknownReportTypeError(
-                report_type=report_type,
-                registry_keys=list(self._rules_registry),
-            )
-        return rules
+        if self._rules_registry is not None:
+            rules = self._rules_registry.get(report_type)
+            if rules is None:
+                from domain.errors import UnknownReportTypeError
+                raise UnknownReportTypeError(report_type, list(self._rules_registry))
+            return rules
+        return self._registry.get_rules(report_type)
 
     def _get_strategy(self, report_type: str) -> TransformationStrategy:
-        strategy = self._strategies.get(report_type)
-        if strategy is None:
-            logger.error(
-                "TransformationService: no strategy for type=%s  known=%s",
-                report_type, list(self._strategies),
-            )
-            raise UnknownReportTypeError(
-                report_type=report_type,
-                registry_keys=list(self._strategies),
-            )
-        return strategy
+        if self._strategies is not None:
+            strategy = self._strategies.get(report_type)
+            if strategy is None:
+                from domain.errors import UnknownReportTypeError
+                raise UnknownReportTypeError(report_type, list(self._strategies))
+            return strategy
+        return self._registry.get_strategy(report_type)
 
 
 # ---------------------------------------------------------------------------

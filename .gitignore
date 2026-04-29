@@ -3,4 +3,7 @@ __pycache__/
 *.pyo
 .venv/
 .vscode/
-
+output/
+wheels/
+wheels_linux/
+ocr_out.txt
