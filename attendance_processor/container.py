@@ -43,7 +43,7 @@ class AppConfig:
     confidence_threshold: float         = 0.25
 
     # Output
-    output_formats:       tuple[str, ...] = field(default=("html", "excel"))
+    output_formats:       tuple[str, ...] = field(default=("html", "pdf"))
 
 
 # ---------------------------------------------------------------------------

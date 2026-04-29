@@ -23,7 +23,7 @@ import re
 from dataclasses import dataclass
 from typing import NamedTuple
 
-from errors import LowConfidenceError
+from domain.errors import LowConfidenceError
 
 logger = logging.getLogger(__name__)
 

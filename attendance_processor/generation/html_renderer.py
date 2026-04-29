@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from domain.models import AttendanceReport, AttendanceRow
-from errors import MissingRendererError, OutputDirectoryError, RenderingError
+from domain.errors import MissingRendererError, OutputDirectoryError, RenderingError
 from generation.base import BaseRenderer
 
 logger = logging.getLogger(__name__)
@@ -360,6 +360,14 @@ class HtmlRenderer(BaseRenderer):
 
         logger.info("HtmlRenderer.render: written → %s", dest)
         return dest
+
+    def build_html(self, report: AttendanceReport) -> str:
+        """Return the HTML string for *report* without writing to disk.
+        Used by PdfRenderer to reuse the same HTML pipeline.
+        """
+        columns = self._resolve_columns(report.report_type)
+        theme   = self._themes.get(report.report_type, next(iter(self._themes.values())))
+        return _build_page(report, columns, theme)
 
     def _resolve_columns(self, report_type: str) -> list[tuple[str, str]]:
         columns = self._column_map.get(report_type)

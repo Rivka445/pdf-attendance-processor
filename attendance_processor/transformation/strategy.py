@@ -165,7 +165,7 @@ class TypeATransformationStrategy(TransformationStrategy):
         new_clock = TimeRange(entry=new_entry, exit=new_exit)
 
         # ── 5: recalculate totals ─────────────────────────────────────────
-        break_min = row.break_rec.duration_min
+        break_min = row.break_rec.duration_min if row.break_rec else 0
         net_hours = round(new_clock.duration_hours - break_min / 60.0, 4)
         overtime  = _compute_overtime(net_hours, rules.overtime) if row.overtime is not None else None
 
@@ -243,7 +243,7 @@ class TypeBTransformationStrategy(TransformationStrategy):
         new_clock = TimeRange(entry=new_entry, exit=new_exit)
 
         # ── 4: break minutes — clamp within rule bounds ───────────────────
-        old_break_min = row.break_rec.duration_min
+        old_break_min = row.break_rec.duration_min if row.break_rec else 0
         new_break_min = max(
             rules.min_break_minutes,
             min(old_break_min + break_delta, rules.max_break_minutes),
@@ -287,7 +287,7 @@ class TypeBTransformationStrategy(TransformationStrategy):
             row.row_date,
             row.clock.entry, new_entry,
             row.clock.exit,  new_exit,
-            (row.break_rec.duration_min if row.break_rec else 0), new_break_min,
+            old_break_min, new_break_min,
             net_hours,
         )
 
