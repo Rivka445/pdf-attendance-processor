@@ -51,7 +51,7 @@ class PdfRenderer(BaseRenderer):
         except ImportError as exc:
             raise RenderingError("weasyprint is required for PDF rendering") from exc
 
-        logger.info(
+        logger.debug(
             "PdfRenderer.render: starting  type=%s  rows=%d",
             report.report_type, len(report.rows),
         )
@@ -80,5 +80,5 @@ class PdfRenderer(BaseRenderer):
             logger.error("PdfRenderer.render: write failed  path=%s  reason=%s", dest, exc)
             raise RenderingError(f"PDF generation failed: {exc}") from exc
 
-        logger.info("PdfRenderer.render: written → %s", dest)
+        logger.debug("PdfRenderer.render: written → %s", dest)
         return dest

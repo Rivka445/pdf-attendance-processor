@@ -176,20 +176,20 @@ def _build_css(t: dict[str, str]) -> str:
         ".rpt-header .sub{font-size:13px;opacity:.85;margin-top:4px}"
         ".rpt-header .meta{font-size:11px;opacity:.8;text-align:left}"
         f".summary-bar{{background:{t['summary_bg']};border:1px solid {t['border']};"
-        "padding:10px 24px;display:flex;flex-wrap:wrap;gap:24px}}"
+        "padding:10px 24px;display:flex;flex-wrap:wrap;gap:24px}"
         ".summary-bar .item{display:flex;flex-direction:column}"
         ".summary-bar .lbl{font-size:10px;color:#5a6a80;"
         "text-transform:uppercase;letter-spacing:.5px}"
         f".summary-bar .val{{font-size:15px;font-weight:600;color:{t['summary_accent']}}}"
-        f".tbl-wrap{{overflow-x:auto;border:1px solid {t['border']};"
-        "border-radius:0 0 8px 8px;background:#fff}}"
+        f".tbl-wrap{{border:1px solid {t['border']};"
+        "border-radius:0 0 8px 8px;background:#fff}"
         "table{width:100%;border-collapse:collapse;font-size:12.5px}"
         f"thead tr{{background:{t['header_bg']};color:{t['header_text']}}}"
         "thead th{padding:9px 10px;text-align:right;font-weight:600;white-space:nowrap}"
         f"tbody tr:nth-child(even){{background:{t['even_row']}}}"
         f"tbody tr:hover{{background:{t['hover']}}}"
         "tbody td{padding:7px 10px;border-bottom:1px solid #e2e8f0;white-space:nowrap}"
-        f".total-row{{background:{t.get('total_row', '#e0e8f0')}!important;font-weight:700}}"
+        f".total-row{{background:{t.get('total_row', '#e0e8f0')} !important;font-weight:700}}"
         ".footer{margin-top:14px;font-size:10px;color:#8a9ab0;text-align:center}"
         "</style>"
     )
@@ -340,7 +340,7 @@ class HtmlRenderer(BaseRenderer):
         self._themes     = themes     if themes     is not None else _DEFAULT_THEMES
 
     def render(self, report: AttendanceReport, output_path: Path) -> Path:
-        logger.info(
+        logger.debug(
             "HtmlRenderer.render: starting  type=%s  rows=%d",
             report.report_type, len(report.rows),
         )
@@ -364,7 +364,7 @@ class HtmlRenderer(BaseRenderer):
             logger.error("HtmlRenderer.render: write failed  path=%s  reason=%s", dest, exc)
             raise OutputDirectoryError(dest, str(exc)) from exc
 
-        logger.info("HtmlRenderer.render: written → %s", dest)
+        logger.debug("HtmlRenderer.render: written → %s", dest)
         return dest
 
     def build_html(self, report: AttendanceReport) -> str:

@@ -46,27 +46,16 @@ class _ScanHit(NamedTuple):
     weight: float
 
 
-# TYPE_A signals: company name header, 125 %/150 % overtime columns, break,
-# location column, Saturday, travel allowance.
+# TYPE_A signals: 125%/150% overtime columns are unique to this layout.
 _TYPE_A_KEYWORDS: tuple[_Keyword, ...] = (
-    _Keyword("company_name",   r"חברת\s+(?:הניקיון|האבטחה|השמירה)", weight=3.0),
-    _Keyword("col_125",        r"125\s*%",                            weight=2.0),
-    _Keyword("col_150",        r"150\s*%",                            weight=2.0),
-    _Keyword("break_col",      r"הפסקה",                              weight=1.5),
-    _Keyword("location_col",   r"(?:אתר|סניף|מיקום)",                 weight=1.0),
-    _Keyword("saturday_col",   r"שבת",                                weight=1.0),
-    _Keyword("travel_col",     r"נסיעות",                             weight=1.0),
+    _Keyword("col_125",  r"125\s*%", weight=2.0),
+    _Keyword("col_150",  r"150\s*%", weight=2.0),
 )
 
-# TYPE_B signals: work-day counter, monthly hours, hourly rate, total payment,
-# half-day.
+# TYPE_B signals: work-day counter and monthly hours header.
 _TYPE_B_KEYWORDS: tuple[_Keyword, ...] = (
-    _Keyword("work_days",      r"ימי\s+עבודה",    weight=3.0),
-    _Keyword("work_month",     r"עבודה\s+לחודש",  weight=2.5),  # catches noisy OCR
-    _Keyword("monthly_hours",  r"שעות\s+חודשיות", weight=3.0),
-    _Keyword("hourly_rate",    r"(?:תעריף|מחיר)\s+(?:שעתי|לשעה)", weight=2.0),
-    _Keyword("total_payment",  r"סה\"כ\s+לתשלום", weight=2.0),
-    _Keyword("half_day",       r"חצי\s+יום",       weight=1.0),
+    _Keyword("work_month",    r"עבודה\s+לחודש",  weight=2.5),
+    _Keyword("monthly_hours", r"שעות\s+חודשיות", weight=3.0),
 )
 
 _TYPE_A_KEYS: frozenset[str] = frozenset(kw.key for kw in _TYPE_A_KEYWORDS)
@@ -198,7 +187,7 @@ class Classifier:
             )
 
         report_type = "TYPE_A" if score_a >= score_b else "TYPE_B"
-        logger.info(
+        logger.debug(
             "Classifier.classify: result=%s confidence=%.2f%%",
             report_type, confidence * 100,
         )

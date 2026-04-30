@@ -7,3 +7,7 @@ output/
 wheels/
 wheels_linux/
 ocr_out.txt
+
+# Log files (keep the directory itself via logs/.gitkeep)
+logs/*.log
+logs/*.log.*

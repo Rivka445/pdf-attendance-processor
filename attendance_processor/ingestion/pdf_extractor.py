@@ -103,11 +103,11 @@ class PDFExtractor:
             OCRError:     If tesseract fails on a page.
         """
         path = Path(pdf_path)
-        logger.info("PDFExtractor.extract: starting  path=%s", path)
+        logger.debug("PDFExtractor.extract: starting  path=%s", path)
         pages = self._pdf_to_pages(path)
         raw   = "\f".join(pages)
         text  = _normalize(raw)
-        logger.info(
+        logger.debug(
             "PDFExtractor.extract: done  pages=%d chars=%d", len(pages), len(text)
         )
         return text

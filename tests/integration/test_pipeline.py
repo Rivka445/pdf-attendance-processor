@@ -63,7 +63,7 @@ _TYPE_B_OCR = """\
 """
 
 # Text with one keyword from each side — should produce very low confidence
-_AMBIGUOUS_OCR = "125% 150% ימי עבודה"
+_AMBIGUOUS_OCR = "125% שעות חודשיות"
 
 
 # ---------------------------------------------------------------------------

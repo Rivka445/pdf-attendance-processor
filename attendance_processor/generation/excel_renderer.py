@@ -155,7 +155,7 @@ class ExcelRenderer(BaseRenderer):
 
         wb = openpyxl.Workbook()
 
-        # ── Sheet 1: נוכחות ──────────────────────────────────────────────
+        # ── Sheet 1: Attendance ──────────────────────────────────────────
         ws_data = wb.active
         ws_data.title = "נוכחות"
 
@@ -184,7 +184,7 @@ class ExcelRenderer(BaseRenderer):
                 total = sum(_cell_value(r, key) for r in report.rows)
                 ws_data.cell(row=totals_row_idx, column=col_idx, value=round(total, 2))
 
-        # ── Sheet 2: סיכום ───────────────────────────────────────────────
+        # ── Sheet 2: Summary ─────────────────────────────────────────────
         ws_summary = wb.create_sheet(title="סיכום")
         for r_idx, (label, value) in enumerate(_summary_rows(report), start=1):
             ws_summary.cell(row=r_idx, column=1, value=label)
@@ -195,5 +195,5 @@ class ExcelRenderer(BaseRenderer):
         except OSError as exc:
             raise OutputDirectoryError(dest, str(exc)) from exc
 
-        logger.info("ExcelRenderer.render: written → %s", dest)
+        logger.debug("ExcelRenderer.render: written → %s", dest)
         return dest

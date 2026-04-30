@@ -64,7 +64,7 @@ def process_pdf(
 
     try:
         # 1. Extract
-        logger.info("Extracting: %s", input_path.name)
+        logger.debug("Extracting: %s", input_path.name)
         text = PDFExtractor(
             config=PDFExtractorConfig(tesseract_cmd=tesseract)
         ).extract(input_path)
@@ -72,14 +72,14 @@ def process_pdf(
 
         # 2. Classify
         clf = Classifier(confidence_threshold=threshold).classify(text)
-        logger.info("  Type: %s  (confidence=%.1f%%)",
+        logger.debug("  Type: %s  (confidence=%.1f%%)",
                     clf.report_type, clf.confidence * 100)
 
         # 3. Parse
         report = ParserFactory().get_parser(clf.report_type).parse(
             text, source_file=str(input_path)
         )
-        logger.info("  %d rows parsed", len(report.rows))
+        logger.debug("  %d rows parsed", len(report.rows))
 
         # 4. Transform
         if transform:
@@ -91,7 +91,7 @@ def process_pdf(
             try:
                 out = renderer.render(report, output_dir)
                 result.output_paths.append(out)
-                logger.info("  [%s] -> %s", type(renderer).__name__, out)
+                logger.debug("  [%s] -> %s", type(renderer).__name__, out)
             except Exception as exc:
                 msg = f"{type(renderer).__name__} failed: {exc}"
                 logger.warning("  %s", msg)

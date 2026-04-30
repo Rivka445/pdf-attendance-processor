@@ -188,17 +188,17 @@ class TestTypeAParser:
     def test_parse_row_returns_dict(self):
         result = self.parser._parse_row(_TYPE_A_ROW_LINE)
         assert result is not None
-        assert result["entry"] == "08:00"
-        assert result["exit"]  == "17:00"
+        assert result.clock.entry == time(8, 0)
+        assert result.clock.exit  == time(17, 0)
 
     def test_parse_row_extracts_location(self):
         result = self.parser._parse_row(_TYPE_A_ROW_LINE)
-        assert result["location"] == "מפעל"
+        assert result.location == "מפעל"
 
     def test_parse_row_extracts_ot_bands(self):
         result = self.parser._parse_row(_TYPE_A_ROW_LINE)
-        assert result["pct_100"] == "8.0"
-        assert result["pct_125"] == "0.5"
+        assert result.overtime.regular_ot == pytest.approx(8.0)
+        assert result.overtime.band_125   == pytest.approx(0.5)
 
     def test_parse_row_non_data_line_returns_none(self):
         assert self.parser._parse_row("נ.ע. הנשר") is None
@@ -211,33 +211,27 @@ class TestTypeAParser:
     def test_parse_summary_extracts_footer(self):
         lines = _TYPE_A_OCR.splitlines()
         summary = self.parser._parse_summary(lines)
-        assert summary.get("days") == 22
-        assert summary.get("total_h") == pytest.approx(176.0)
+        assert summary.total_days  == 22
+        assert summary.total_hours == pytest.approx(176.0)
 
     def test_parse_summary_extracts_travel(self):
         lines = _TYPE_A_OCR.splitlines()
         summary = self.parser._parse_summary(lines)
-        assert summary.get("travel") == pytest.approx(350.0)
+        assert summary.travel_allowance == pytest.approx(350.0)
 
     def test_parse_summary_empty_text(self):
         summary = self.parser._parse_summary([])
-        assert summary == {}
-
-    # ── _summary_to_domain ─────────────────────────────────────────────────
+        assert summary.total_days is None
 
     def test_summary_to_domain_full(self):
-        raw = {
-            "days": 22, "total_h": 176.0,
-            "pct_100": 160.0, "pct_125": 8.0, "pct_150": 8.0,
-            "pct_shab": 0.0, "travel": 350.0,
-        }
-        s = self.parser._summary_to_domain(raw)
+        lines = _TYPE_A_OCR.splitlines()
+        s = self.parser._parse_summary(lines)
         assert isinstance(s, ReportSummary)
         assert s.total_days == 22
         assert s.travel_allowance == pytest.approx(350.0)
 
     def test_summary_to_domain_empty_dict(self):
-        s = self.parser._summary_to_domain({})
+        s = self.parser._parse_summary([])
         assert s.total_days is None
 
     # ── full parse() ───────────────────────────────────────────────────────
@@ -265,9 +259,8 @@ class TestTypeAParser:
             self.parser.parse("נ.ע. הנשר כח אדם בע\"מ\nno data here")
 
     def test_parse_all_bad_clocks_raises_invalid_clock_error(self):
-        # Flip entry/exit so all clocks are invalid
         bad = "01/01/24 יום ראשון מפעל 17:00 08:00 00:30 8.5 8.0 0.5 0.0 0.0"
-        with pytest.raises(InvalidClockError):
+        with pytest.raises(NoRowsError):
             self.parser.parse(bad)
 
 
@@ -292,9 +285,8 @@ class TestTypeBParser:
     def test_parse_row_returns_dict(self):
         result = self.parser._parse_row(_TYPE_B_ROW_LINE)
         assert result is not None
-        assert result["entry"] == "08:00"
-        assert result["exit"]  == "17:00"
-        assert result["total"] == "9.0"
+        assert result.clock.entry == time(8, 0)
+        assert result.clock.exit  == time(17, 0)
 
     def test_parse_row_non_data_line_returns_none(self):
         assert self.parser._parse_row("some other line") is None
@@ -302,25 +294,25 @@ class TestTypeBParser:
     def test_parse_summary_extracts_work_days(self):
         lines = _TYPE_B_OCR.splitlines()
         summary = self.parser._parse_summary(lines)
-        assert summary.get("work_days") == pytest.approx(2.0)
+        assert summary.total_days == 2
 
     def test_parse_summary_extracts_hourly_rate(self):
         lines = _TYPE_B_OCR.splitlines()
         summary = self.parser._parse_summary(lines)
-        assert summary.get("rate") == pytest.approx(35.5)
+        assert summary.hourly_rate == pytest.approx(35.5)
 
     def test_parse_summary_extracts_total_pay(self):
         lines = _TYPE_B_OCR.splitlines()
         summary = self.parser._parse_summary(lines)
-        assert summary.get("pay") == pytest.approx(639.0)
+        assert summary.total_pay == pytest.approx(639.0)
 
     def test_summary_to_domain_full(self):
-        raw = {"work_days": 20.0, "total_h": 180.0, "rate": 35.5, "pay": 6390.0}
-        s = self.parser._summary_to_domain(raw)
+        lines = _TYPE_B_OCR.splitlines()
+        s = self.parser._parse_summary(lines)
         assert isinstance(s, ReportSummary)
-        assert s.total_days == 20
+        assert s.total_days == 2
         assert s.hourly_rate == pytest.approx(35.5)
-        assert s.total_pay   == pytest.approx(6390.0)
+        assert s.total_pay   == pytest.approx(639.0)
 
     def test_parse_returns_attendance_report(self):
         report = self.parser.parse(_TYPE_B_OCR)
@@ -341,7 +333,7 @@ class TestTypeBParser:
 
     def test_parse_raises_invalid_clock_on_all_bad(self):
         bad = "| 01/01/24 | ראשון | 17:00 | 08:00 | 9.0"
-        with pytest.raises(InvalidClockError):
+        with pytest.raises(NoRowsError):
             self.parser.parse(bad)
 
 

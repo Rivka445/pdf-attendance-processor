@@ -15,6 +15,13 @@ import os
 import sys
 from pathlib import Path
 
+# Silence third-party loggers before any other imports trigger them
+logging.getLogger("weasyprint").setLevel(logging.ERROR)
+logging.getLogger("fontTools").setLevel(logging.ERROR)
+logging.getLogger("fontTools.subset").setLevel(logging.ERROR)
+
+from attendance_processor.config.logging_config import setup_logging
+
 _DEFAULT_TESSERACT = os.environ.get(
     "TESSERACT_CMD",
     r"C:\Program Files\Tesseract-OCR\tesseract.exe",
@@ -102,10 +109,7 @@ def main(argv: list[str] | None = None) -> int:
     else:
         level = logging.INFO
 
-    logging.basicConfig(
-        format="%(asctime)s %(levelname)-8s %(name)s: %(message)s",
-        level=level,
-    )
+    setup_logging(level=level)
 
     renderers = [_RENDERER_MAP[fmt]() for fmt in args.formats]
 

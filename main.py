@@ -17,13 +17,9 @@ from attendance_processor.transformation.service import TransformationService
 from attendance_processor.generation.html_renderer import HtmlRenderer
 from attendance_processor.generation.pdf_renderer import PdfRenderer
 from attendance_processor.generation.excel_renderer import ExcelRenderer
+from attendance_processor.config.logging_config import setup_logging
 
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s  %(levelname)-8s  %(message)s",
-    datefmt="%H:%M:%S",
-    stream=sys.stderr,
-)
+setup_logging(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 

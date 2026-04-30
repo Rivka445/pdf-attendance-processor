@@ -347,7 +347,7 @@ class TestTransformationService:
             svc.transform(report)
 
     def test_custom_strategies_injected(self):
-        """Custom strategy registry overrides the defaults."""
+        """Custom strategy via TypeRegistry overrides the defaults."""
         calls = []
 
         class SpyStrategy:
@@ -355,11 +355,17 @@ class TestTransformationService:
                 calls.append(row)
                 return row
 
-        from config.rules import RULES_REGISTRY
-        svc = TransformationService(
-            strategies={"SPY": SpyStrategy()},
-            rules_registry={"SPY": RULES_REGISTRY["TYPE_A"]},
+        from config.rules import TYPE_A_RULES
+        from registry import TypeRegistry
+        from parsers.type_a_parser import TypeAParser
+
+        registry = TypeRegistry()
+        registry.register("SPY",
+            parser=TypeAParser(),
+            strategy=SpyStrategy(),
+            rules=TYPE_A_RULES,
         )
+        svc = TransformationService(registry=registry)
         report = AttendanceReport(
             report_type="SPY",
             rows=(_make_type_a_row(),),

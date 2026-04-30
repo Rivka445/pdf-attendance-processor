@@ -38,7 +38,6 @@ tests/
 - Python 3.12+
 - [Tesseract OCR](https://github.com/UB-Mannheim/tesseract/wiki) — install to `C:\Program Files\Tesseract-OCR\`
 - Hebrew language pack: included in the Tesseract installer (select `heb` during setup)
-- [GTK3 Runtime](https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer/releases) — required for PDF rendering via WeasyPrint
 
 ### Docker
 No local dependencies needed — everything is installed inside the container.
@@ -127,7 +126,7 @@ docker run --rm -v ${PWD}/input:/data -v ${PWD}/output:/output attendance-report
 |--------|-------------|
 | `.html` | Self-contained RTL HTML with styled table and summary bar |
 | `.xlsx` | Two sheets: `נוכחות` (attendance rows) + `סיכום` (summary) |
-| `.pdf` | PDF rendered from the HTML via WeasyPrint |
+| `.pdf` | PDF rendered from the HTML via xhtml2pdf (WeasyPrint on Linux/Docker) |
 
 ---
 
@@ -177,10 +176,9 @@ python -m pytest tests/ --cov=attendance_processor
 ## Architecture
 
 - **Immutable domain models** — `frozen=True` Pydantic models; transformers always return new objects
-- **DI Container** (`AppContainer`) — lazy singleton services, all dependencies injected via constructor
-- **TypeRegistry** — single registration point for parser + strategy + rules per report type
-- **Strategy pattern** — `TypeATransformationStrategy` / `TypeBTransformationStrategy` per report type
-- **Template Method** — `BaseParser.parse()` orchestrates; subclasses implement `_parse_row`, `_parse_summary`, etc.
+- **TypeRegistry** — single registration point for parser + strategy + rules per report type; injected into every service
+- **Strategy pattern** — `TypeATransformationStrategy` / `TypeBTransformationStrategy`; shared `_jitter_clock()` in base eliminates duplication
+- **Template Method** — `BaseParser.parse()` orchestrates; subclasses implement only `_parse_row()` → `AttendanceRow` and `_parse_summary()` → `ReportSummary` directly
 - **Thin CLI** — `cli.py` only parses arguments and calls `app.process_pdf()`; no business logic
 
 ---
@@ -188,39 +186,41 @@ python -m pytest tests/ --cov=attendance_processor
 ## Design Patterns
 
 ### Strategy
-The transformation layer uses the Strategy pattern. `TransformationService` holds a registry of strategies, one per report type. At runtime it selects the correct strategy (`TypeATransformationStrategy` / `TypeBTransformationStrategy`) without any `if/else` branching. Adding a new report type requires only registering a new strategy — no changes to existing code.
+The transformation layer uses the Strategy pattern. `TransformationService` receives a `TypeRegistry` and selects the correct strategy at runtime without any `if/else` branching. Adding a new report type requires only a single `registry.register()` call — no changes to existing code.
+
+`TransformationStrategy` (ABC) provides a shared `_jitter_clock()` implementation used by both concrete strategies, eliminating duplication.
 
 ```
-TransformationService
+TransformationService(registry)
   └─► TypeRegistry.get_strategy(report_type)
         ├─► TypeATransformationStrategy.transform_row(row, rules)
         └─► TypeBTransformationStrategy.transform_row(row, rules)
+              └─► TransformationStrategy._jitter_clock()  ← shared
 ```
 
 ### Template Method
-`BaseParser.parse()` defines the skeleton of the parsing algorithm: split lines → extract summary → filter headers → parse rows → convert to domain objects. Subclasses (`TypeAParser`, `TypeBParser`) implement only the steps that differ (`_parse_row`, `_parse_summary`, `_rows_to_domain`, `_summary_to_domain`). The orchestration logic is never duplicated.
+`BaseParser.parse()` defines the skeleton: split lines → extract summary → filter headers → parse rows → assemble report. Subclasses implement only the three steps that differ between report types.
+
+`_parse_row()` and `_parse_summary()` return domain objects directly (`AttendanceRow`, `ReportSummary`) — no intermediate dict conversion layer.
 
 ```
 BaseParser.parse()          ← template method (shared, never overridden)
-  ├─► _parse_summary()      ← implemented by subclass
+  ├─► _parse_summary()      ← implemented by subclass → ReportSummary
   ├─► _is_header_line()     ← implemented by subclass
-  ├─► _parse_row()          ← implemented by subclass
-  ├─► _rows_to_domain()     ← implemented by subclass
-  └─► _summary_to_domain()  ← implemented by subclass
+  └─► _parse_row()          ← implemented by subclass → AttendanceRow | None
 ```
 
 ### Dependency Injection
-`AppContainer` wires the entire application. Every service is created once (lazy singleton) and receives its dependencies through the constructor — nothing is imported at module level inside services. This makes every component independently testable and replaceable.
+`TypeRegistry` is injected into every service that needs per-type behaviour. The default registry is built once via `TypeRegistry.default()`; tests inject a custom registry without touching production code.
 
 ```python
-container = AppContainer(AppConfig(tesseract_cmd=r"C:\..."))
-container.parser_factory        # ParserFactory(registry=...)
-container.transformation_service  # TransformationService(registry=...)
-container.renderers             # [HtmlRenderer(), ExcelRenderer(), PdfRenderer()]
+registry = TypeRegistry.default()
+TransformationService(registry=registry)
+ParserFactory(registry=registry)
 ```
 
 ### Registry
-`TypeRegistry` is the single source of truth for every report type. Instead of three separate dicts scattered across `ParserFactory`, `TransformationService`, and `config/rules.py`, all per-type components (parser + strategy + rules) are registered once. Adding a new type is a single `registry.register()` call.
+`TypeRegistry` is the single source of truth for every report type. All per-type components (parser + strategy + rules) are registered once. Adding a new type is a single `registry.register()` call.
 
 ### Facade
 `app.process_pdf()` is a facade that hides the full pipeline complexity behind one function call. `cli.py` and `main.py` call only this function — they have zero knowledge of OCR, classification, parsing, or transformation internals.
