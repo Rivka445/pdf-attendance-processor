@@ -10,6 +10,7 @@ Processes scanned attendance PDF reports (TYPE_A / TYPE_B), applies realistic ti
 attendance_processor/
 ├── classification/     # Classifier — detects TYPE_A vs TYPE_B
 ├── config/             # Business rules (workday bounds, OT thresholds)
+│   └── logging_config.py  # Centralised logging setup (file + stderr)
 ├── domain/             # Immutable domain models + custom exceptions
 ├── generation/         # Renderers: HTML, Excel, PDF
 ├── ingestion/          # PDF → OCR text (Tesseract + PyMuPDF)
@@ -22,6 +23,8 @@ attendance_processor/
 
 cli.py                  # CLI entry point (thin — calls app.process_pdf)
 main.py                 # Simple script entry point
+logs/                   # Runtime log files (auto-created, git-ignored)
+│   └── attendance_processor.log  # Rotating log (5 MB × 3 backups)
 Dockerfile              # Container definition
 requirements.txt        # Pinned dependencies (Windows)
 requirements-docker.txt # Unpinned dependencies (Linux/Docker)
@@ -180,6 +183,7 @@ python -m pytest tests/ --cov=attendance_processor
 - **Strategy pattern** — `TypeATransformationStrategy` / `TypeBTransformationStrategy`; shared `_jitter_clock()` in base eliminates duplication
 - **Template Method** — `BaseParser.parse()` orchestrates; subclasses implement only `_parse_row()` → `AttendanceRow` and `_parse_summary()` → `ReportSummary` directly
 - **Thin CLI** — `cli.py` only parses arguments and calls `app.process_pdf()`; no business logic
+- **Centralised logging** — configured once in `config/logging_config.py` via `setup_logging()`; writes to both `stderr` and a rotating log file (`logs/attendance_processor.log`, 5 MB × 3 backups); noisy third-party loggers (`weasyprint`, `fontTools`) are silenced at `ERROR` level
 
 ---
 
@@ -227,6 +231,28 @@ ParserFactory(registry=registry)
 
 ### Immutable Value Objects
 All domain models (`TimeRange`, `BreakRecord`, `OvertimeBuckets`, `AttendanceRow`, `ReportSummary`, `AttendanceReport`) are frozen Pydantic models or frozen dataclasses. Transformers never mutate — they always return new objects. This eliminates an entire class of bugs and makes the pipeline fully deterministic.
+
+### Logging
+
+`setup_logging()` in `config/logging_config.py` is called once at startup (by `cli.py` or `main.py`) and configures the root logger with two handlers:
+
+| Handler | Destination | Level |
+|---------|-------------|-------|
+| `StreamHandler` | `stderr` | as requested (`INFO` / `DEBUG` / `WARNING`) |
+| `RotatingFileHandler` | `logs/attendance_processor.log` | same as above |
+
+- Log files rotate at **5 MB**, keeping **3 backups** — `attendance_processor.log.1`, `.2`, `.3`.
+- `logs/` is created automatically on first run and is **git-ignored** (only `logs/.gitkeep` is tracked).
+- Third-party loggers (`weasyprint`, `fontTools.subset`) are silenced at `ERROR` level to suppress OCR/rendering noise.
+- All internal modules use `logging.getLogger(__name__)` — no module configures handlers on its own.
+
+```
+cli.py / main.py
+  └─► setup_logging(level)          ← single call, configures root logger
+        ├─► StreamHandler (stderr)
+        └─► RotatingFileHandler (logs/attendance_processor.log)
+              5 MB × 3 backups
+```
 
 ---
 
