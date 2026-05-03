@@ -18,11 +18,9 @@ attendance_processor/
 ├── transformation/     # Time-jitter strategies + TransformationService
 ├── app.py              # Application facade — process_pdf()
 ├── container.py        # DI container (AppContainer / AppConfig)
-├── errors.py           # Re-export of domain.errors for bare imports
 └── registry.py         # TypeRegistry — single source of truth per type
 
 cli.py                  # CLI entry point (thin — calls app.process_pdf)
-main.py                 # Simple script entry point
 logs/                   # Runtime log files (auto-created, git-ignored)
 │   └── attendance_processor.log  # Rotating log (5 MB × 3 backups)
 Dockerfile              # Container definition
