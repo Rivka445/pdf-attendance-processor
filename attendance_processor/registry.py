@@ -112,6 +112,23 @@ class TypeRegistry:
             strategy=TypeBTransformationStrategy(),
             rules=TYPE_B_RULES,
         )
+
+        # ── Adding a new report type (e.g. TYPE_C) ────────────────────────────
+        # 1. classification/classifier.py  — add _TYPE_C keyword patterns and
+        #                                    update classify() to score & return "TYPE_C"
+        # 2. config/rules.py               — define TYPE_C_RULES
+        #                                    (WorkdayBounds, TimeVariationBounds, OvertimeThresholds)
+        # 3. parsers/type_c_parser.py      — create TypeCParser(BaseParser) implementing parse()
+        # 4. transformation/strategy.py   — create TypeCTransformationStrategy implementing transform_row()
+        # 5. registry.py (here)            — register all four components:
+        #
+        #    registry.register(
+        #        "TYPE_C",
+        #        parser=TypeCParser(),
+        #        strategy=TypeCTransformationStrategy(),
+        #        rules=TYPE_C_RULES,
+        #    )
+
         return registry
 
     # ── Private ───────────────────────────────────────────────────────────────
