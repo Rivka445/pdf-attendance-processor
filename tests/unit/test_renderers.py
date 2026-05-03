@@ -36,7 +36,6 @@ from domain.models import (
     AttendanceReport,
     AttendanceRow,
     BreakRecord,
-    BreakType,
     OvertimeBuckets,
     ReportSummary,
     TimeRange,
@@ -61,7 +60,6 @@ def _make_clock(entry=(8, 0), exit_=(17, 0)):
 
 def _make_break():
     return BreakRecord(
-        break_type=BreakType.LUNCH,
         clock=TimeRange(entry=time(12, 0), exit=time(12, 30)),
         duration_min=30,
     )
@@ -70,7 +68,7 @@ def _make_break():
 def _make_ot():
     return OvertimeBuckets(
         regular_ot=8.0, band_125=1.0, band_150=0.5,
-        weekend_ot=0.0, total_ot=9.5,
+
     )
 
 

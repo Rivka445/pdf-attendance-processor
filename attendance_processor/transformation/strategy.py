@@ -51,7 +51,7 @@ def _compute_overtime(net_hours: float, thresholds: OvertimeThresholds) -> Overt
     band_150 = round(max(0.0, net - thresholds.overtime_125_cap), 4)
     return OvertimeBuckets(
         regular_ot=regular, band_125=band_125, band_150=band_150,
-        weekend_ot=0.0, total_ot=round(regular + band_125 + band_150, 4),
+        weekend_ot=0.0,
     )
 
 

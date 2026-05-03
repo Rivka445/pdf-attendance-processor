@@ -31,7 +31,6 @@ from domain.models import (  # noqa: E402 — must come after path insert
     AttendanceReport,
     AttendanceRow,
     BreakRecord,
-    BreakType,
     OvertimeBuckets,
     ReportSummary,
     TimeRange,
@@ -48,7 +47,6 @@ def simple_clock() -> TimeRange:
 def lunch_break() -> BreakRecord:
     """30-minute lunch break starting at 12:00."""
     return BreakRecord(
-        break_type=BreakType.LUNCH,
         clock=TimeRange(entry=time(12, 0), exit=time(12, 30)),
         duration_min=30,
     )
@@ -61,7 +59,7 @@ def sample_ot() -> OvertimeBuckets:
         band_125=1.0,
         band_150=0.5,
         weekend_ot=0.0,
-        total_ot=9.5,
+
     )
 
 

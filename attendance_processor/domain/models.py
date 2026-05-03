@@ -24,22 +24,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import date, time
-from enum import Enum
 from typing import Optional
 
 from pydantic import BaseModel, Field, model_validator
-
-
-# ---------------------------------------------------------------------------
-# Enumerations
-# ---------------------------------------------------------------------------
-
-class BreakType(str, Enum):
-    """Classifies the nature of a break entry."""
-    LUNCH  = "LUNCH"
-    SHORT  = "SHORT"
-    UNPAID = "UNPAID"
-    OTHER  = "OTHER"
 
 
 # ---------------------------------------------------------------------------
@@ -94,7 +81,6 @@ class BreakRecord(BaseModel):
     Absent / None in TYPE_B reports.
     """
 
-    break_type:   BreakType  = Field(default=BreakType.OTHER)
     clock:        TimeRange  = Field(..., description="Break start / end times")
     duration_min: int        = Field(..., ge=0, description="Duration in minutes")
 
@@ -128,21 +114,13 @@ class OvertimeBuckets(BaseModel):
     band_125:   float = Field(default=0.0, ge=0.0, description="125 % OT hours")
     band_150:   float = Field(default=0.0, ge=0.0, description="150 % OT hours")
     weekend_ot: float = Field(default=0.0, ge=0.0, description="Sabbath / weekend OT hours")
-    total_ot:   float = Field(default=0.0, ge=0.0, description="Sum of all OT bands")
 
     model_config = {"frozen": True}
 
-    @model_validator(mode="after")
-    def _total_matches_sum(self) -> "OvertimeBuckets":
-        computed = round(
-            self.regular_ot + self.band_125 + self.band_150 + self.weekend_ot, 4
-        )
-        if self.total_ot != 0.0 and abs(computed - self.total_ot) > 0.05:
-            raise ValueError(
-                f"total_ot ({self.total_ot}) does not match "
-                f"sum of bands ({computed})"
-            )
-        return self
+    @property
+    def total_ot(self) -> float:
+        """Sum of all OT bands."""
+        return round(self.regular_ot + self.band_125 + self.band_150 + self.weekend_ot, 4)
 
 
 # ---------------------------------------------------------------------------
@@ -250,45 +228,6 @@ class ReportSummary(BaseModel):
                                                 description="כרטיס עובד לחודש (month label)")
 
     model_config = {"frozen": True}
-
-
-# ---------------------------------------------------------------------------
-# Null Objects  — replace None checks throughout the codebase
-# ---------------------------------------------------------------------------
-
-class NullBreakRecord(BreakRecord):
-    """
-    Sentinel that behaves like a BreakRecord with zero duration.
-    Use instead of None so callers never need ``if row.break_rec``.
-    """
-    model_config = {"frozen": True}
-
-    def __init__(self) -> None:
-        super().__init__(
-            break_type=BreakType.OTHER,
-            clock=TimeRange(
-                entry=__import__("datetime").time(0, 0),
-                exit=__import__("datetime").time(0, 1),
-            ),
-            duration_min=0,
-        )
-
-
-class NullOvertimeBuckets(OvertimeBuckets):
-    """
-    Sentinel that behaves like OvertimeBuckets with all zeros.
-    Use instead of None so callers never need ``if row.overtime``.
-    """
-    model_config = {"frozen": True}
-
-    def __init__(self) -> None:
-        super().__init__(
-            regular_ot=0.0,
-            band_125=0.0,
-            band_150=0.0,
-            weekend_ot=0.0,
-            total_ot=0.0,
-        )
 
 
 # ---------------------------------------------------------------------------

@@ -3,9 +3,9 @@ classification/classifier.py
 ============================
 Classifies a normalised OCR text string as "TYPE_A", "TYPE_B", or "UNKNOWN".
 
-Two internal stages (both live in this file):
-  1. Keyword scan   — regex-based pattern matching, one hit per keyword.
-  2. Weighted score — sum hit weights per type, normalise to confidence.
+  1. Each type has a list of (compiled_pattern, weight) pairs.
+  2. _score() sums hit-count × weight for one type.
+  3. Classifier.classify() picks the winner or raises LowConfidenceError.
 
 Public surface:
   ClassificationResult  — frozen dataclass: report_type, confidence, scores
@@ -21,7 +21,6 @@ from __future__ import annotations
 import logging
 import re
 from dataclasses import dataclass
-from typing import NamedTuple
 
 from domain.errors import LowConfidenceError
 
@@ -29,68 +28,28 @@ logger = logging.getLogger(__name__)
 
 
 # ---------------------------------------------------------------------------
-# Stage 1 – keyword definitions and scanner
+# Keyword patterns  — (compiled regex, weight)
 # ---------------------------------------------------------------------------
-
-@dataclass(frozen=True)
-class _Keyword:
-    key:            str
-    pattern:        str
-    weight:         float
-    case_sensitive: bool = False
-
-
-class _ScanHit(NamedTuple):
-    key:    str
-    count:  int
-    weight: float
-
 
 # TYPE_A signals: 125%/150% overtime columns are unique to this layout.
-_TYPE_A_KEYWORDS: tuple[_Keyword, ...] = (
-    _Keyword("col_125",  r"125\s*%", weight=2.0),
-    _Keyword("col_150",  r"150\s*%", weight=2.0),
-)
+_TYPE_A: list[tuple[re.Pattern[str], float]] = [
+    (re.compile(r"125\s*%", re.IGNORECASE), 2.0),
+    (re.compile(r"150\s*%", re.IGNORECASE), 2.0),
+]
 
 # TYPE_B signals: work-day counter and monthly hours header.
-_TYPE_B_KEYWORDS: tuple[_Keyword, ...] = (
-    _Keyword("work_month",    r"עבודה\s+לחודש",  weight=2.5),
-    _Keyword("monthly_hours", r"שעות\s+חודשיות", weight=3.0),
-)
-
-_TYPE_A_KEYS: frozenset[str] = frozenset(kw.key for kw in _TYPE_A_KEYWORDS)
-_TYPE_B_KEYS: frozenset[str] = frozenset(kw.key for kw in _TYPE_B_KEYWORDS)
+_TYPE_B: list[tuple[re.Pattern[str], float]] = [
+    (re.compile(r"עבודה\s+לחודש",  re.IGNORECASE), 2.5),
+    (re.compile(r"שעות\s+חודשיות", re.IGNORECASE), 3.0),
+]
 
 
-def _compile(keywords: tuple[_Keyword, ...]) -> dict[str, re.Pattern[str]]:
-    return {
-        kw.key: re.compile(
-            kw.pattern,
-            0 if kw.case_sensitive else re.IGNORECASE,
-        )
-        for kw in keywords
-    }
-
-
-_COMPILED: dict[str, re.Pattern[str]] = {
-    **_compile(_TYPE_A_KEYWORDS),
-    **_compile(_TYPE_B_KEYWORDS),
-}
-_ALL_KEYWORDS: tuple[_Keyword, ...] = _TYPE_A_KEYWORDS + _TYPE_B_KEYWORDS
-
-
-def _scan(text: str) -> list[_ScanHit]:
-    """Return one _ScanHit per keyword."""
-    hits: list[_ScanHit] = []
-    for kw in _ALL_KEYWORDS:
-        matches = _COMPILED[kw.key].findall(text)
-        count   = len(matches)
-        hits.append(_ScanHit(key=kw.key, count=count, weight=kw.weight))
-    return hits
+def _score(text: str, patterns: list[tuple[re.Pattern[str], float]]) -> float:
+    return sum(weight * len(p.findall(text)) for p, weight in patterns)
 
 
 # ---------------------------------------------------------------------------
-# Stage 2 – scoring and result
+# Result + Classifier
 # ---------------------------------------------------------------------------
 
 @dataclass(frozen=True)
@@ -120,10 +79,6 @@ class ClassificationResult:
         )
 
 
-# ---------------------------------------------------------------------------
-# Public classifier
-# ---------------------------------------------------------------------------
-
 class Classifier:
     """
     Classifies normalised OCR text as TYPE_A, TYPE_B, or UNKNOWN.
@@ -139,7 +94,6 @@ class Classifier:
 
     def __init__(self, confidence_threshold: float = 0.25) -> None:
         self._threshold = confidence_threshold
-        logger.debug("Classifier initialised: confidence_threshold=%.2f", confidence_threshold)
 
     def classify(self, text: str) -> ClassificationResult:
         """
@@ -151,23 +105,14 @@ class Classifier:
 
         Raises:
             LowConfidenceError: If the winning score does not exceed the
-                                threshold (result.report_type will be UNKNOWN
-                                but callers that need a hard failure can catch
-                                this exception instead).
+                                threshold.
         """
-        logger.debug("Classifier.classify: scanning text length=%d", len(text))
-        hits    = _scan(text)
-        score_a = sum(h.weight * h.count for h in hits if h.key in _TYPE_A_KEYS)
-        score_b = sum(h.weight * h.count for h in hits if h.key in _TYPE_B_KEYS)
+        score_a = _score(text, _TYPE_A)
+        score_b = _score(text, _TYPE_B)
         total   = score_a + score_b
 
-        logger.debug(
-            "Classifier.classify: score_a=%.2f score_b=%.2f total=%.2f",
-            score_a, score_b, total,
-        )
-
         if total == 0:
-            logger.warning("Classifier.classify: no keyword hits — result=UNKNOWN")
+            logger.warning("no keyword hits — result=UNKNOWN")
             raise LowConfidenceError(
                 score_a=0.0, score_b=0.0, confidence=0.0, threshold=self._threshold
             )
@@ -176,7 +121,7 @@ class Classifier:
 
         if confidence < self._threshold:
             logger.warning(
-                "Classifier.classify: low confidence %.2f%% < threshold %.2f%% — result=UNKNOWN",
+                "low confidence %.2f%% < threshold %.2f%% — result=UNKNOWN",
                 confidence * 100, self._threshold * 100,
             )
             raise LowConfidenceError(
@@ -186,14 +131,8 @@ class Classifier:
                 threshold=self._threshold,
             )
 
-        report_type = "TYPE_A" if score_a >= score_b else "TYPE_B"
-        logger.debug(
-            "Classifier.classify: result=%s confidence=%.2f%%",
-            report_type, confidence * 100,
-        )
-
         return ClassificationResult(
-            report_type=report_type,
+            report_type="TYPE_A" if score_a >= score_b else "TYPE_B",
             score_a=score_a,
             score_b=score_b,
             confidence=confidence,

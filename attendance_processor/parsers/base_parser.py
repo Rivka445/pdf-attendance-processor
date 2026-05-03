@@ -29,25 +29,16 @@ logger = logging.getLogger(__name__)
 # Shared OCR noise cleanup — used by all parsers
 # ---------------------------------------------------------------------------
 
-_RTL_CHARS = re.compile(r"[\u200e\u200f\u202a-\u202e\u2066-\u2069]")
-_SHEKEL_RE = re.compile(r"\u20aa")
-
-
-def clean_ocr(line: str) -> str:
-    """Strip RTL marks and replace shekel sign with digit zero."""
-    line = _RTL_CHARS.sub("", line)
-    return _SHEKEL_RE.sub("0", line)
-
 
 class BaseParser(ABC):
     """
     Common skeleton for TYPE_A and TYPE_B parsers.
 
     Subclasses implement:
-        report_type        – string identifier e.g. 'TYPE_A'
-        _parse_summary()   – extracts header/footer → ReportSummary
-        _parse_row()       – parses one data line   → AttendanceRow | None
-        _is_header_line()  – True for headers / separators to skip
+        report_type         string identifier e.g. 'TYPE_A'
+        _parse_summary()    extracts header/footer → ReportSummary
+        _parse_row()        parses one data line   → AttendanceRow | None
+        _is_header_line()   True for headers / separators to skip
     """
 
     @property

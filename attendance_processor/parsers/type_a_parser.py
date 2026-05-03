@@ -7,10 +7,10 @@ import re
 from datetime import date, time as dt_time
 
 from domain.models import (
-    AttendanceRow, BreakRecord, BreakType,
+    AttendanceRow, BreakRecord,
     OvertimeBuckets, ReportSummary, TimeRange,
 )
-from parsers.base_parser import BaseParser, clean_ocr
+from parsers.base_parser import BaseParser
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +77,6 @@ _COMPANY_RE   = re.compile(r"(?:הנשר|נ\.ע\.|כח\s+אדם)[^\n]*", re.UNIC
 
 
 def _preprocess(line: str) -> str:
-    line = clean_ocr(line)
     return re.sub(r"(?<![\d:])00(?=\s)", "0", line)
 
 
@@ -134,7 +133,7 @@ class TypeAParser(BaseParser):
         for line in lines:
             stripped = line.strip()
             if company_name is None and _COMPANY_RE.search(stripped):
-                company_name = re.sub(r"\s+ND\s*", " ", clean_ocr(stripped)).strip()
+                company_name = re.sub(r"\s+ND\s*", " ", stripped).strip()
             fm = _FOOTER_LINE.match(stripped)
             if fm and days is None:
                 days, total_h = int(fm.group(1)), float(fm.group(3))
@@ -188,7 +187,6 @@ class TypeAParser(BaseParser):
             return None
         end_min = clock.entry.hour * 60 + clock.entry.minute + dur_min
         return BreakRecord(
-            break_type   = BreakType.LUNCH,
             clock        = TimeRange(entry=clock.entry, exit=dt_time(end_min // 60, end_min % 60)),
             duration_min = dur_min,
         )
@@ -198,7 +196,6 @@ class TypeAParser(BaseParser):
         return OvertimeBuckets(
             regular_ot=round(h[0], 2), band_125=round(h[1], 2),
             band_150=round(h[2], 2),   weekend_ot=round(h[3], 2),
-            total_ot=round(sum(h), 2),
         )
 
     def _post_process_rows(self, rows: list[AttendanceRow]) -> list[AttendanceRow]:

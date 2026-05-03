@@ -32,7 +32,6 @@ from domain.models import (
     AttendanceReport,
     AttendanceRow,
     BreakRecord,
-    BreakType,
     OvertimeBuckets,
     ReportSummary,
     TimeRange,
@@ -162,13 +161,12 @@ def _make_type_a_row(
     with_ot: bool = True,
 ) -> AttendanceRow:
     brk = BreakRecord(
-        break_type=BreakType.LUNCH,
         clock=TimeRange(entry=time(12, 0), exit=time(12, 30)),
         duration_min=30,
     ) if with_break else None
     ot = OvertimeBuckets(
         regular_ot=8.0, band_125=0.5, band_150=0.0,
-        weekend_ot=0.0, total_ot=8.5,
+
     ) if with_ot else None
     return AttendanceRow(
         row_date=d,

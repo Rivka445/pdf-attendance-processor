@@ -17,7 +17,7 @@ from datetime import date
 from typing import Optional
 
 from domain.models import AttendanceRow, ReportSummary
-from parsers.base_parser import BaseParser, clean_ocr
+from parsers.base_parser import BaseParser
 
 logger = logging.getLogger(__name__)
 
@@ -77,7 +77,6 @@ def _norm_time(s: str) -> str:
 
 
 def _preprocess(line: str) -> str:
-    line = clean_ocr(line)
     line = re.sub(r"\[(?=[^|])", "|", line)
     line = re.sub(r"\(", "|", line)
     line = re.sub(r"(\|\s*\|\s*)([\u05d0-\u05ea]{2,})", r"| \2", line)

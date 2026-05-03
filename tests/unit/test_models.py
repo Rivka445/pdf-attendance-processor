@@ -21,7 +21,6 @@ from domain.models import (
     AttendanceReport,
     AttendanceRow,
     BreakRecord,
-    BreakType,
     OvertimeBuckets,
     ReportSummary,
     TimeRange,
@@ -71,7 +70,6 @@ class TestTimeRange:
 class TestBreakRecord:
     def test_valid(self):
         br = BreakRecord(
-            break_type=BreakType.LUNCH,
             clock=TimeRange(entry=time(12, 0), exit=time(12, 30)),
             duration_min=30,
         )
@@ -80,7 +78,6 @@ class TestBreakRecord:
     def test_duration_mismatch_within_tolerance(self):
         # 1-minute tolerance is allowed
         BreakRecord(
-            break_type=BreakType.SHORT,
             clock=TimeRange(entry=time(12, 0), exit=time(12, 30)),
             duration_min=29,
         )
@@ -88,17 +85,9 @@ class TestBreakRecord:
     def test_duration_mismatch_outside_tolerance_raises(self):
         with pytest.raises(Exception):
             BreakRecord(
-                break_type=BreakType.SHORT,
                 clock=TimeRange(entry=time(12, 0), exit=time(12, 30)),
                 duration_min=15,  # differs by 15 min — well outside tolerance
             )
-
-    def test_default_break_type(self):
-        br = BreakRecord(
-            clock=TimeRange(entry=time(12, 0), exit=time(12, 20)),
-            duration_min=20,
-        )
-        assert br.break_type == BreakType.OTHER
 
 
 # ---------------------------------------------------------------------------
@@ -111,28 +100,12 @@ class TestOvertimeBuckets:
         assert ot.total_ot == 0.0
 
     def test_valid_with_values(self):
-        ot = OvertimeBuckets(
-            regular_ot=8.0,
-            band_125=1.0,
-            band_150=0.5,
-            weekend_ot=0.0,
-            total_ot=9.5,
-        )
+        ot = OvertimeBuckets(regular_ot=8.0, band_125=1.0, band_150=0.5, weekend_ot=0.0)
         assert ot.total_ot == 9.5
 
-    def test_total_mismatch_large_raises(self):
-        with pytest.raises(Exception):
-            OvertimeBuckets(
-                regular_ot=8.0,
-                band_125=1.0,
-                band_150=0.0,
-                weekend_ot=0.0,
-                total_ot=5.0,  # wrong — sum is 9.0
-            )
-
-    def test_total_zero_skips_validation(self):
-        # total_ot=0 bypasses the sum check (partial data allowed)
-        OvertimeBuckets(regular_ot=0.0, band_125=0.0, band_150=0.0, weekend_ot=0.0, total_ot=0.0)
+    def test_total_ot_is_computed(self):
+        ot = OvertimeBuckets(regular_ot=1.0, band_125=2.0, band_150=3.0, weekend_ot=4.0)
+        assert ot.total_ot == 10.0
 
     def test_negative_band_raises(self):
         with pytest.raises(Exception):
@@ -166,7 +139,6 @@ class TestAttendanceRow:
 
     def test_net_hours_with_break(self):
         brk = BreakRecord(
-            break_type=BreakType.LUNCH,
             clock=TimeRange(entry=time(12, 0), exit=time(12, 30)),
             duration_min=30,
         )
